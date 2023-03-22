@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/student/model/domain"
 	"github.com/hafidz98/be_rumbuk_api/student/model/service"
@@ -20,6 +21,14 @@ func ToStudentResponse(student domain.Students) service.StudentResponse {
 	}
 }
 
+func ToStudentResponses(students []domain.Students) []service.StudentResponse {
+	var studentResponses []service.StudentResponse
+	for _, student := range students {
+		studentResponses = append(studentResponses, ToStudentResponse(student))
+	}
+	return studentResponses
+}
+
 type StudentService interface {
 	Create(context context.Context, request service.StudentCreateRequest) service.StudentResponse
 	Update(context context.Context, request service.StudentUpdateRequest) service.StudentResponse
@@ -31,9 +40,13 @@ type StudentService interface {
 type StudentServiceImpl struct {
 	StudentRepository repository.StudentRepo
 	DB                *sql.DB
+	Validate          *validator.Validate
 }
 
 func (service *StudentServiceImpl) Create(context context.Context, request service.StudentCreateRequest) service.StudentResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -48,6 +61,9 @@ func (service *StudentServiceImpl) Create(context context.Context, request servi
 }
 
 func (service *StudentServiceImpl) Update(context context.Context, request service.StudentUpdateRequest) service.StudentResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -94,12 +110,4 @@ func (service *StudentServiceImpl) FindAll(context context.Context) []service.St
 	students := service.StudentRepository.SelectAll(context, tx)
 
 	return ToStudentResponses(students)
-}
-
-func ToStudentResponses(students []domain.Students) []service.StudentResponse {
-	var studentResponses []service.StudentResponse
-	for _, student := range students {
-		studentResponses = append(studentResponses, ToStudentResponse(student))
-	}
-	return studentResponses
 }
