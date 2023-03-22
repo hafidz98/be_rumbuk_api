@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"github.com/hafidz98/be_rumbuk_api/app"
+	"github.com/hafidz98/be_rumbuk_api/helper"
+)
 
 func main() {
-	fmt.Println("Halo dunia")
+	helper.Info.Println("RUMBUK API STARTING")
+
+	app.NewDB()
+	app.NewDB().Close()
 }
