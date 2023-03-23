@@ -13,11 +13,15 @@ type StudentRepo interface {
 	Create(context context.Context, tx *sql.Tx, student domain.Students) domain.Students
 	Update(context context.Context, tx *sql.Tx, student domain.Students) domain.Students
 	Delete(context context.Context, tx *sql.Tx, student domain.Students)
-	SelectAll(context context.Context, tx *sql.Tx) []domain.Students
+	FetchAll(context context.Context, tx *sql.Tx) []domain.Students
 	FetchBySId(ctx context.Context, tx *sql.Tx, studentID string) (domain.Students, error)
 }
 
 type StudentRepoImpl struct{}
+
+func NewStudentRepo() StudentRepo{
+	return &StudentRepoImpl{}
+}
 
 func (repo *StudentRepoImpl) Create(context context.Context, tx *sql.Tx, student domain.Students) domain.Students {
 	query := "insert into student(student_id, name, gender, batch_year, major, faculty, phone_number, email, password) values(?,?,?,?,?,?,?,?,?)"

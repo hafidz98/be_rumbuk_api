@@ -22,6 +22,12 @@ type StudentControllerImpl struct {
 	StudentService service.StudentService
 }
 
+func NewStudentController(studentService service.StudentService) StudentController{
+	return &StudentControllerImpl{
+		StudentService: studentService,
+	}
+}
+
 func (controller *StudentControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	studentCreateRequest := service_model.StudentCreateRequest{}
 	decoder := json.NewDecoder(request.Body)

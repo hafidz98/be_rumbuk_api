@@ -43,6 +43,14 @@ type StudentServiceImpl struct {
 	Validate          *validator.Validate
 }
 
+func NewStudentService(studentRepository repository.StudentRepo, DB *sql.DB, validate *validator.Validate) StudentService {
+	return &StudentServiceImpl{
+		StudentRepository: studentRepository,
+		DB:                DB,
+		Validate:          validate,
+	}
+}
+
 func (service *StudentServiceImpl) Create(context context.Context, request service.StudentCreateRequest) service.StudentResponse {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
@@ -107,7 +115,7 @@ func (service *StudentServiceImpl) FindAll(context context.Context) []service.St
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	students := service.StudentRepository.SelectAll(context, tx)
+	students := service.StudentRepository.FetchAll(context, tx)
 
 	return ToStudentResponses(students)
 }

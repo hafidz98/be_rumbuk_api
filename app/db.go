@@ -24,19 +24,22 @@ func NewDB() *sql.DB {
 
 	//DSN format "root@tcp(localhost:3306)/todos_api_db"
 	dsn := (username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname)
+	helper.Info.Println("Try connect to " + dsn)
+
 	db, err := sql.Open("mysql", dsn)
 	helper.PanicIfError(err)
+	//defer db.Close()
 
-	helper.Info.Println("Connected to " + dsn)
+	err = db.Ping()
+	if err != nil {
+		helper.Error.Println("Database connection error")
+		panic(err.Error())
+	}
 
 	db.SetMaxIdleConns(2)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(60 * time.Minute)
 	db.SetConnMaxIdleTime(10 * time.Minute)
-
-	if err != nil {
-		helper.Error.Println("Database connection error")
-	}
 
 	helper.Info.Println("Database connection established")
 	return db
