@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	"github.com/hafidz98/be_rumbuk_api/student/model/domain"
+	"github.com/hafidz98/be_rumbuk_api/model/domain"
 )
 
 type StudentRepo interface {

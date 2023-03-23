@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	"github.com/hafidz98/be_rumbuk_api/student/model/domain"
-	"github.com/hafidz98/be_rumbuk_api/student/model/service"
-	"github.com/hafidz98/be_rumbuk_api/student/repository"
+	"github.com/hafidz98/be_rumbuk_api/model/domain"
+	"github.com/hafidz98/be_rumbuk_api/model/service"
+	"github.com/hafidz98/be_rumbuk_api/repository"
 )
 
 // data model request dan data model response
