@@ -22,7 +22,7 @@ type StudentControllerImpl struct {
 	StudentService service.StudentService
 }
 
-func NewStudentController(studentService service.StudentService) StudentController{
+func NewStudentController(studentService service.StudentService) StudentController {
 	return &StudentControllerImpl{
 		StudentService: studentService,
 	}
@@ -36,9 +36,9 @@ func (controller *StudentControllerImpl) Create(writer http.ResponseWriter, requ
 
 	studentResponse := controller.StudentService.Create(request.Context(), studentCreateRequest)
 	webResponse := service_model.WebResponse{
-		Code: http.StatusCreated,
+		Code:   http.StatusCreated,
 		Status: http.StatusText(http.StatusCreated),
-		Data: studentResponse,
+		Data:   studentResponse,
 	}
 
 	writer.Header().Add("Content-Type", "application/json")
@@ -57,9 +57,9 @@ func (controller *StudentControllerImpl) Update(writer http.ResponseWriter, requ
 
 	studentResponse := controller.StudentService.Update(request.Context(), studentUpdateRequest)
 	webResponse := service_model.WebResponse{
-		Code: http.StatusCreated,
-		Status: http.StatusText(http.StatusCreated),
-		Data: studentResponse,
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   studentResponse,
 	}
 
 	writer.Header().Add("Content-Type", "application/json")
@@ -73,8 +73,8 @@ func (controller *StudentControllerImpl) Delete(writer http.ResponseWriter, requ
 
 	controller.StudentService.Delete(request.Context(), studentId)
 	webResponse := service_model.WebResponse{
-		Code: http.StatusCreated,
-		Status: http.StatusText(http.StatusCreated),
+		Code:   http.StatusNoContent,
+		Status: http.StatusText(http.StatusOK),
 	}
 
 	writer.Header().Add("Content-Type", "application/json")
@@ -88,9 +88,9 @@ func (controller *StudentControllerImpl) FetchById(writer http.ResponseWriter, r
 
 	studentResponse := controller.StudentService.FetchById(request.Context(), studentId)
 	webResponse := service_model.WebResponse{
-		Code: http.StatusCreated,
-		Status: http.StatusText(http.StatusCreated),
-		Data: studentResponse,
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   studentResponse,
 	}
 
 	writer.Header().Add("Content-Type", "application/json")
@@ -102,9 +102,9 @@ func (controller *StudentControllerImpl) FetchById(writer http.ResponseWriter, r
 func (controller *StudentControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	studentResponses := controller.StudentService.FindAll(request.Context())
 	webResponse := service_model.WebResponse{
-		Code: http.StatusCreated,
-		Status: http.StatusText(http.StatusCreated),
-		Data: studentResponses,
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   studentResponses,
 	}
 
 	writer.Header().Add("Content-Type", "application/json")

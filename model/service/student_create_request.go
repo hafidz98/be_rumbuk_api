@@ -3,5 +3,6 @@ package service
 // representasi dari request
 
 type StudentCreateRequest struct {
-	Name string `validate:"required,max=255" json:"name"`
+	StudentID string `validate:"required" json:"student_id"`
+	Name      string `validate:"required,max=255" json:"name"`
 }

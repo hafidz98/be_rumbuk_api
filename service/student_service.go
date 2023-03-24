@@ -60,7 +60,8 @@ func (service *StudentServiceImpl) Create(context context.Context, request servi
 	defer helper.CommitOrRollback(tx)
 
 	student := domain.Students{
-		Name: request.Name,
+		StudentID: request.StudentID,
+		Name:      request.Name,
 	}
 
 	student = service.StudentRepository.Create(context, tx, student)

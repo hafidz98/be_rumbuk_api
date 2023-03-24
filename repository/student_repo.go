@@ -19,7 +19,7 @@ type StudentRepo interface {
 
 type StudentRepoImpl struct{}
 
-func NewStudentRepo() StudentRepo{
+func NewStudentRepo() StudentRepo {
 	return &StudentRepoImpl{}
 }
 
@@ -53,6 +53,7 @@ func (repo *StudentRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []dom
 	query := "select student_id, name, gender, batch_year, major, faculty, phone_number, email from student"
 	rows, err := tx.QueryContext(context, query)
 	helper.PanicIfError(err)
+	defer rows.Close()
 
 	var students []domain.Students
 	for rows.Next() {
