@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/model/domain"
 	"github.com/hafidz98/be_rumbuk_api/model/service"
@@ -16,8 +17,14 @@ import (
 
 func ToStudentResponse(student domain.Students) service.StudentResponse {
 	return service.StudentResponse{
-		StudentID: student.StudentID,
-		Name:      student.Name,
+		StudentID:   student.StudentID,
+		Name:        student.Name,
+		Gender:      student.Gender,
+		BatchYear:   student.BatchYear,
+		Major:       student.Major,
+		Faculty:     student.Faculty,
+		PhoneNumber: student.PhoneNumber,
+		Email:       student.Email,
 	}
 }
 
@@ -60,8 +67,15 @@ func (service *StudentServiceImpl) Create(context context.Context, request servi
 	defer helper.CommitOrRollback(tx)
 
 	student := domain.Students{
-		StudentID: request.StudentID,
-		Name:      request.Name,
+		StudentID:   request.StudentID,
+		Name:        request.Name,
+		Gender:      request.Gender,
+		BatchYear:   request.BatchYear,
+		Major:       request.Major,
+		Faculty:     request.Faculty,
+		PhoneNumber: request.PhoneNumber,
+		Email:       request.Email,
+		Password:    request.Password,
 	}
 
 	student = service.StudentRepository.Create(context, tx, student)
@@ -78,9 +92,22 @@ func (service *StudentServiceImpl) Update(context context.Context, request servi
 	defer helper.CommitOrRollback(tx)
 
 	student, err := service.StudentRepository.FetchBySId(context, tx, request.StudentID)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
-	student.Name = request.Name
+	//student.Name = request.Name
+
+	student = domain.Students{
+		StudentID:   request.StudentID,
+		Name:        request.Name,
+		Gender:      request.Gender,
+		BatchYear:   request.BatchYear,
+		Major:       request.Major,
+		Faculty:     request.Faculty,
+		PhoneNumber: request.PhoneNumber,
+		Email:       request.Email,
+	}
 
 	student = service.StudentRepository.Update(context, tx, student)
 
@@ -93,7 +120,9 @@ func (service *StudentServiceImpl) Delete(context context.Context, studentId str
 	defer helper.CommitOrRollback(tx)
 
 	student, err := service.StudentRepository.FetchBySId(context, tx, studentId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	service.StudentRepository.Delete(context, tx, student)
 }
@@ -106,7 +135,9 @@ func (service *StudentServiceImpl) FetchById(context context.Context, studentId 
 	defer helper.CommitOrRollback(tx)
 
 	student, err := service.StudentRepository.FetchBySId(context, tx, studentId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	return ToStudentResponse(student)
 }

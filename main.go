@@ -6,6 +6,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/app"
 	"github.com/hafidz98/be_rumbuk_api/controller"
+
+	"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/repository"
 	"github.com/hafidz98/be_rumbuk_api/service"
@@ -38,6 +40,7 @@ func main() {
 	router.PATCH("/rooms", nil)
 	router.DELETE("/rooms", nil)
 
+	
 	//
 	/*
 		router.GET("", nil)
@@ -46,6 +49,8 @@ func main() {
 		router.PATCH("", nil)
 		router.DELETE("", nil)
 	*/
+
+	router.PanicHandler = exception.ErrorHandler
 
 	server := http.Server{
 		Addr:    "localhost:8991",
