@@ -1,4 +1,4 @@
-package repository
+package repositories
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	"github.com/hafidz98/be_rumbuk_api/model/domain"
+	"github.com/hafidz98/be_rumbuk_api/models/domain"
 )
 
 type StudentRepo interface {
@@ -76,7 +76,7 @@ func (repo *StudentRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []dom
 }
 
 func (repo *StudentRepoImpl) FetchBySId(context context.Context, tx *sql.Tx, studentId string) (domain.Students, error) {
-	query := "select student_id, name, gender, batch_year, major, faculty, phone_number, email from student where student_id=?"
+	query := "select student_id, name, gender, batch_year, major, faculty, phone_number, email, password from student where student_id=?"
 	rows, err := tx.QueryContext(context, query, studentId)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -92,6 +92,7 @@ func (repo *StudentRepoImpl) FetchBySId(context context.Context, tx *sql.Tx, stu
 			&student.Faculty,
 			&student.PhoneNumber,
 			&student.Email,
+			&student.Password,
 		)
 		helper.PanicIfError(err)
 		return student, nil

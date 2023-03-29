@@ -5,12 +5,23 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	"github.com/hafidz98/be_rumbuk_api/model/service"
+	"github.com/hafidz98/be_rumbuk_api/models/service"
+)
+
+const (
+	AccessUnauthorized    = "Access unauthorized"
+	InvalidOrMissingToken = "Invalid or missing access token"
+	InvalidCredentials    = "Invalid email and password combination"
+	DuplicateEmail        = "An account with that email already exists"
 )
 
 func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interface{}) {
 
-	if notFoundError(writer, request, err){
+	if authError(writer, request, err) {
+		return
+	}
+
+	if notFoundError(writer, request, err) {
 		return
 	}
 
@@ -19,6 +30,25 @@ func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interfa
 	}
 
 	internalServerError(writer, request, err)
+}
+
+func authError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
+	exception, ok := err.(AuthError)
+	if ok {
+		writer.Header().Set("Content-Type", "application/json")
+		//writer.WriteHeader(http.StatusUnauthorized)
+
+		webResponse := service.WebResponse{
+			Code:   http.StatusUnauthorized,
+			Status: http.StatusText(http.StatusUnauthorized),
+			Data:   exception.Error,
+		}
+
+		helper.WriteToResponseBody(writer, webResponse)
+		return true
+	} else {
+		return false
+	}
 }
 
 func notFoundError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {

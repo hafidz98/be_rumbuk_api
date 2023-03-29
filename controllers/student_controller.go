@@ -1,12 +1,13 @@
-package controller
+package controllers
 
 import (
 	"encoding/json"
 	"net/http"
 
+	//"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	service_model "github.com/hafidz98/be_rumbuk_api/model/service"
-	"github.com/hafidz98/be_rumbuk_api/service"
+	service_model "github.com/hafidz98/be_rumbuk_api/models/service"
+	service "github.com/hafidz98/be_rumbuk_api/services"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -16,6 +17,7 @@ type StudentController interface {
 	Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FetchById(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	//Login(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }
 
 type StudentControllerImpl struct {
@@ -27,6 +29,27 @@ func NewStudentController(studentService service.StudentService) StudentControll
 		StudentService: studentService,
 	}
 }
+
+// func (controller *StudentControllerImpl) Login(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+// 	studentLoginRequest := service_model.StudentLoginRequest{}
+// 	decoder := json.NewDecoder(request.Body)
+// 	err := decoder.Decode(&studentLoginRequest)
+// 	helper.PanicIfError(err)
+
+// 	tokenString := controller.StudentService.Login(request.Context(), studentLoginRequest)
+// 	webResponse := service_model.WebResponse{
+// 		Code:   http.StatusOK,
+// 		Status: http.StatusText(http.StatusOK),
+// 		Data:   "Authorized",
+// 	}
+
+// 	//writer.Header().Add("User-Role", "Student")
+// 	writer.Header().Add("X-JWT-Token-Key", tokenString)
+// 	writer.Header().Add("Content-Type", "application/json")
+// 	encoder := json.NewEncoder(writer)
+// 	err = encoder.Encode(webResponse)
+// 	helper.PanicIfError(err)
+// }
 
 func (controller *StudentControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	studentCreateRequest := service_model.StudentCreateRequest{}
@@ -84,7 +107,17 @@ func (controller *StudentControllerImpl) Delete(writer http.ResponseWriter, requ
 }
 
 func (controller *StudentControllerImpl) FetchById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	// role := request.Header.Get("X-User-Role")
+	// id := request.Header.Get("X-User-Id")
 	studentId := params.ByName("studentId")
+
+	// if role == "Student" {
+	// 	if studentId != id {
+	// 		panic(exception.NewAuthorization(exception.AccessUnauthorized))
+	// 	}
+	// } else if role != "Admin" && role != "Staff" {
+	// 	panic(exception.NewAuthorization(exception.AccessUnauthorized))
+	// }
 
 	studentResponse := controller.StudentService.FetchById(request.Context(), studentId)
 	webResponse := service_model.WebResponse{
@@ -100,7 +133,12 @@ func (controller *StudentControllerImpl) FetchById(writer http.ResponseWriter, r
 }
 
 func (controller *StudentControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	// if role := request.Header.Get("X-User-Role"); role != "Admin" && role != "Staff" {
+	// 	panic(exception.NewAuthorization(exception.AccessUnauthorized))
+	// }
+
 	studentResponses := controller.StudentService.FindAll(request.Context())
+
 	webResponse := service_model.WebResponse{
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
