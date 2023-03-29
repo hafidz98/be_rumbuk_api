@@ -17,8 +17,10 @@ func StudentRoute(db *sql.DB, validate *validator.Validate) *group.RouteGroup {
 	studentService := services.NewStudentService(studentRepository, db, validate)
 	studentController := controllers.NewStudentController(studentService)
 
-	apiStudentRoute := group.New("/students").GET(studentController.FindAll).POST(studentController.Create).Middleware(middlewares.AuthMiddleware).Children(
-		group.New("/:studentId").GET(studentController.FetchById).PATCH(studentController.Update).DELETE(studentController.Delete),
+	apiStudentRoute := group.New("/students").Middleware(middlewares.AuthMiddleware).Children(
+		group.New("").GET(studentController.FindAll).Middleware(middlewares.RequiredAdmin),
+		group.New("/:studnetId").DELETE(studentController.Delete).Middleware(middlewares.RequiredAdmin),
+		group.New("/:studentId").GET(studentController.FetchById).PATCH(studentController.Update).Middleware(middlewares.RequiredStudentOrAdmin),
 	)
 
 	return apiStudentRoute
