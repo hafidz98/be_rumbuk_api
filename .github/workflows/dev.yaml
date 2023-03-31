@@ -8,9 +8,6 @@ on:
 jobs:
   db:
     environment: dev
-    env:
-      HOST: ${{ secrets.SERVER_HOST }}
-      ROOT_PATH: /home/${{ secrets.SERVER_USERNAME }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout files
@@ -22,5 +19,5 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          source: "./Dockerfile.db,./db.sql"
-          taget: "test"
+          source: "Dockerfile.db,db.sql"
+          taget: "/home/limitbreak/test"
