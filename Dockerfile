@@ -2,7 +2,8 @@
 ## Stage 1 - Base APP
 FROM golang:1.19.3 AS builder
 LABEL maintainer="Hafidz98 <github.com/hafidz98>"
-RUN apk update && apk add --no-cache git
+
+#RUN apk update && apk add --no-cache git
 
 WORKDIR /app
 
