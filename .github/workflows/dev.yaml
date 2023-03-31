@@ -9,8 +9,8 @@ jobs:
   db:
     environment: dev
     env:
-      HOST: ....
-      ROOT_PATH: /home/....
+      HOST: ${{ secrets.SERVER_HOST }}
+      ROOT_PATH: /home/${{ secrets.SERVER_USERNAME }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout files
