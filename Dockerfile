@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:
 # Stage 1 - Base APP
 FROM golang:1.19.3 AS builder
 LABEL maintainer="Hafidz98 <github.com/hafidz98>"
