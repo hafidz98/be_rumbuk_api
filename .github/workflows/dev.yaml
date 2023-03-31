@@ -8,6 +8,9 @@ on:
 jobs:
   db:
     environment: dev
+    env:
+      HOST: ....
+      ROOT_PATH: /home/....
     runs-on: ubuntu-latest
     steps:
       - name: Checkout files
@@ -20,4 +23,4 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           source: "./Dockerfile.db,./db.sql"
-          taget: test
+          taget: "test"
