@@ -22,12 +22,12 @@ jobs:
             cd /
             cd /home/limitbreak/test
             sudo docker build -t mysql_image . -f Dockerfile.db
-            sudo docker container run --name db_mysql --rm \
+            sudo docker run -d --rm \
             -e "MYSQL_DATABASE=${{ secrets.DB_NAME }}"\
             -e "MYSQL_USERNAME=${{ secrets.DB_USERNAME }}"\
             -e "MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }}"\
             -e "MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}"\
-            -p 13306:3306 -d mysql_image
+            -p 13306:3306 --name db_mysql mysql_image
 
   build:
     needs: db
