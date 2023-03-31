@@ -13,7 +13,7 @@ jobs:
       - name: Checkout files
         uses: Bhacaz/checkout-files@v2
         with:
-          files: Dockerfiledb db.sql
+          files: ./Dockerfiledb ./db.sql
 
       - name: Deploy Files to Server
         uses: appleboy/scp-action@master
