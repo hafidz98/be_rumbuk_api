@@ -1,38 +1,26 @@
 package helper
 
 import (
-	"fmt"
+	//"fmt"
 	"os"
-
-	//"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hafidz98/be_rumbuk_api/models/service"
 )
 
 type CustomClaims struct {
-	//UserData interface{} `json:"user_data"`
 	UserData *service.GlobalJWTResponse `json:"user_data"`
 	jwt.RegisteredClaims
 }
 
 func GenerateJWT(userData *service.GlobalJWTResponse, claims jwt.RegisteredClaims) (tokenString string, err error) {
 	var jwtKey = []byte(os.Getenv("JWT_ACCESS_SECRET_KEY"))
-	fmt.Printf("key: \t %x \n", jwtKey)
-	//expTime := time.Now().Add(30 * time.Minute)
+	//fmt.Printf("key: \t %x \n", jwtKey)
 
 	claim := &CustomClaims{
 		UserData:         userData,
 		RegisteredClaims: claims,
 	}
-
-	// claims := &CustomClaims{
-	// 	UserData: userData,
-	// 	RegisteredClaims: jwt.RegisteredClaims{
-	// 		ExpiresAt: jwt.NewNumericDate(expTime),
-	// 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-	// 	},
-	// }
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	tokenString, err = token.SignedString(jwtKey)
