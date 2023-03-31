@@ -11,9 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout files
-        uses: Bhacaz/checkout-files@v2
-        with:
-          files: ./Dockerfiledb ./db.sql
+        uses: actions/checkout@master
 
       - name: Deploy Files to Server
         uses: appleboy/scp-action@master
