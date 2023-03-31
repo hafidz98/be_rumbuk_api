@@ -1,0 +1,17 @@
+FROM mysql:latest
+
+LABEL maintainer="Hafidz98 <github.com/hafidz98>"
+
+ARG MYSQL_DATABASE\
+    MYSQL_USERNAME\
+    MYSQL_PASSWORD\
+    MYSQL_ROOT_PASSWORD
+
+ENV MYSQL_DATABASE=${MYSQL_DATABASE}\
+    MYSQL_USER=${MYSQL_USER}\
+    MYSQL_PASSWORD=${MYSQL_PASSWORD}\
+    MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
+ADD schema.sql /docker-entrypoint-initdb.d
+
+EXPOSE 3306
