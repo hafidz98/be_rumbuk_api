@@ -12,6 +12,6 @@ ENV MYSQL_DATABASE=${MYSQL_DATABASE}\
     MYSQL_PASSWORD=${MYSQL_PASSWORD}\
     MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
 
-ADD schema.sql /docker-entrypoint-initdb.d
+ADD db.sql /docker-entrypoint-initdb.d
 
 EXPOSE 3306
