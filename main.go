@@ -21,7 +21,10 @@ import (
 
 func init() {
 	err := godotenv.Load(".env")
-	helper.PanicIfError(err)
+	if err != nil {
+		helper.Warning.Println(err)
+		return
+	}
 }
 
 func StartNonTLSServer() {
