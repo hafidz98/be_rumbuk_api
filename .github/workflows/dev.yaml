@@ -10,7 +10,7 @@ jobs:
     environment: dev
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Databas to Server
+      - name: Setup Database to Server
         uses: appleboy/ssh-action@master
         # env:
         with:
@@ -22,12 +22,12 @@ jobs:
             cd /
             cd /home/limitbreak/test
             sudo docker build -t mysql_image . -f Dockerfile.db
-            sudo docker run -d --rm \
-            -e "MYSQL_DATABASE=${{ secrets.DB_NAME }}"\
-            -e "MYSQL_USERNAME=${{ secrets.DB_USERNAME }}"\
-            -e "MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }}"\
-            -e "MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}"\
-            -p 13306:3306 --name db_mysql mysql_image
+            sudo docker run --name db_mysql -d --rm\
+            -e MYSQL_DATABASE="${{secrets.DB_NAME}}"\
+            -e MYSQL_USERNAME="${{secrets.DB_USERNAME}}"\
+            -e MYSQL_PASSWORD="${{secrets.DB_PASSWORD}}"\
+            -e MYSQL_ROOT_PASSWORD="${{secrets.DB_ROOT_PASSWORD}}"\
+            -p 13306:3306 mysql_image
 
   build:
     needs: db
