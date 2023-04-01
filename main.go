@@ -48,7 +48,7 @@ func main() {
 	router := httprouter.New()
 	router.PanicHandler = exception.ErrorHandler
 
-	go StartNonTLSServer()
+	//go StartNonTLSServer()
 
 	mainRoute := group.New(basepath).Middleware(middleware.CommonMiddleware).Children(
 		routes.AuthRoute(db, validate),
@@ -66,8 +66,14 @@ func main() {
 		Handler: router,
 	}
 
+	// go func() {
+	// 	if err := server.ListenAndServeTLS("cert/certificate.crt", "cert/private.key"); err != nil && err != http.ErrServerClosed {
+	// 		helper.Error.Println(err)
+	// 	}
+	// }()
+
 	go func() {
-		if err := server.ListenAndServeTLS("cert/certificate.crt", "cert/private.key"); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			helper.Error.Println(err)
 		}
 	}()

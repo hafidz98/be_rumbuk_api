@@ -3,7 +3,7 @@ FROM mysql:latest
 LABEL maintainer="Hafidz98 <github.com/hafidz98>"
 
 ARG MYSQL_DATABASE\
-    MYSQL_USERNAME\
+    MYSQL_USER\
     MYSQL_PASSWORD\
     MYSQL_ROOT_PASSWORD
 
