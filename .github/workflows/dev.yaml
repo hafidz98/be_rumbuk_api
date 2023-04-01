@@ -73,7 +73,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
             sudo docker container run --name ${{ vars.CONTAINER_NAME }} \
             -e DB_DRIVER='${{ secrets.DB_DRIVER }}' \
-            -e DB_HOST='' \
+            -e DB_HOST='${{ secrets.DB_HOST }}' \
             -e DB_PORT='${{ secrets.DB_PORT }}' \
             -e DB_NAME='${{ secrets.DB_NAME }}' \
             -e DB_USER='${{ secrets.DB_USERNAME }}' \
