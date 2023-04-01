@@ -24,9 +24,7 @@ jobs:
             sudo docker network rm rumbuk-net
             sudo docker network create rumbuk-net
             sudo docker build -t mysql_image . -f Dockerfile.db
-            sudo docker run --name db_mysql -d --rm \
-            -e MYSQL_USER='${{secrets.DB_USERNAME}}' \
-            -e MYSQL_PASSWORD='${{secrets.DB_PASSWORD}}' \
+            sudo docker run --name db_mysql -d \
             -e MYSQL_ROOT_PASSWORD='${{secrets.DB_ROOT_PASSWORD}}' \
             -p 3306:3306 --net=rumbuk-net --hostname=db_mysql mysql_image
 
