@@ -27,7 +27,7 @@ jobs:
             sudo docker build -t mysql_image . -f Dockerfile.db
             sudo docker container run --name db_mysql \
             -e MYSQL_ROOT_PASSWORD='${{secrets.DB_ROOT_PASSWORD}}' \
-            -p 3306:3306 --net=rumbuk-net --hostname=db_mysql mysql_image
+            -dt -p 3306:3306 --net=rumbuk-net --hostname=db_mysql mysql_image
 
   build:
     needs: db
@@ -82,4 +82,4 @@ jobs:
             -e APP_ADDRESS='${{ secrets.APP_ADDRESS }}' \
             -e APP_PORT='${{ secrets.APP_PORT }}' \
             -e JWT_ACCESS_SECRET_KEY='${{ secrets.JWT_ACCESS_SECRET_KEY }}' \
-            -p 80:8991 --net=rumbuk-net --hostname=${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
+            -dt -p 80:8991 --net=rumbuk-net --hostname=${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
