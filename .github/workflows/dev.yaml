@@ -82,4 +82,4 @@ jobs:
             -e APP_ADDRESS='' \
             -e APP_PORT='${{ secrets.APP_PORT }}' \
             -e JWT_ACCESS_SECRET_KEY='${{ secrets.JWT_ACCESS_SECRET_KEY }}' \
-            -dt -p 80:8991 --net=rumbuk-net --hostname=${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
+            -p 80:8991 --net=rumbuk-net --hostname=${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
