@@ -42,13 +42,14 @@ func main() {
 	flag.Parse()
 
 	basepath := os.Getenv("API_BASE_PATH")
-	address := os.Getenv("APP_ADDRESS") + ":" + os.Getenv("APP_PORT")
+	// address := os.Getenv("APP_ADDRESS") + ":" + os.Getenv("APP_PORT")
+	address := ":" + os.Getenv("APP_PORT")
 	db := app.NewDB()
 	validate := validator.New()
 	router := httprouter.New()
 	router.PanicHandler = exception.ErrorHandler
 
-	//go StartNonTLSServer()
+	// go StartNonTLSServer()
 
 	mainRoute := group.New(basepath).Middleware(middleware.CommonMiddleware).Children(
 		routes.AuthRoute(db, validate),

@@ -79,7 +79,6 @@ jobs:
             -e DB_USER='${{ secrets.DB_USERNAME }}' \
             -e DB_PASSWORD='${{ secrets.DB_ROOT_PASSWORD }}' \
             -e API_BASE_PATH='${{ vars.API_BASE_PATH }}' \
-            -e APP_ADDRESS='' \
             -e APP_PORT='${{ secrets.APP_PORT }}' \
             -e JWT_ACCESS_SECRET_KEY='${{ secrets.JWT_ACCESS_SECRET_KEY }}' \
-            -p 80:8991 --net=rumbuk-net --hostname=${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
+            -d -p 80:8991 --net=rumbuk-net --hostname=${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
