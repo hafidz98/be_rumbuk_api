@@ -70,4 +70,4 @@ jobs:
             echo ${{ secrets.DOCKER_ACCESS_TOKEN }} | sudo docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
             sudo docker rm -f ${{ vars.CONTAINER_NAME }}
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
-            sudo docker run --name app_rumbuk_be -e DB_DRIVER='mysql' -e DB_HOST='db_mysql' -e DB_PORT='3306' -e DB_NAME='app_rumbuk_db' -e DB_USER='root' -e DB_PASSWORD='${{ secrets.DB_ROOT_PASSWORD }}' -e API_BASE_PATH='/v1/rumbuk' -e APP_ADDRESS='' -e APP_PORT='8991' -e JWT_ACCESS_SECRET_KEY='${{ secrets.JWT_ACCESS_SECRET_KEY }}' -p 80:8991 --net=rumbuk-net --hostname=app_rumbuk_be limitbreak/app_rumbuk_be
+            sudo docker run -dit --name app_rumbuk_be -e DB_DRIVER='mysql' -e DB_HOST='db_mysql' -e DB_PORT='3306' -e DB_NAME='app_rumbuk_db' -e DB_USER='root' -e DB_PASSWORD='${{ secrets.DB_ROOT_PASSWORD }}' -e API_BASE_PATH='/v1/rumbuk' -e APP_ADDRESS='' -e APP_PORT='8991' -e JWT_ACCESS_SECRET_KEY='${{ secrets.JWT_ACCESS_SECRET_KEY }}' -p 80:8991 --net=rumbuk-net --hostname=${{ vars.CONTAINER_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ vars.IMAGE_NAME }}
