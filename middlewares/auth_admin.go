@@ -15,4 +15,3 @@ func RequiredAdmin(handler httprouter.Handle) httprouter.Handle {
 		handler(writer, request, params)
 	}
 }
-

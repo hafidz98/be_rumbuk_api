@@ -30,7 +30,7 @@ func init() {
 func StartNonTLSServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		helper.Info.Println("Redirecting to :443")
-		http.Redirect(w, r, os.Getenv("APP_ADDRESS")+":"+os.Getenv("APP_PORT"), http.StatusTemporaryRedirect)
+		http.Redirect(w, r, ":443", http.StatusTemporaryRedirect)
 	})
 
 	http.ListenAndServe(":80", nil)
@@ -44,6 +44,7 @@ func main() {
 	basepath := os.Getenv("API_BASE_PATH")
 	// address := os.Getenv("APP_ADDRESS") + ":" + os.Getenv("APP_PORT")
 	address := ":" + os.Getenv("APP_PORT")
+
 	db := app.NewDB()
 	validate := validator.New()
 	router := httprouter.New()
@@ -100,3 +101,5 @@ func main() {
 	helper.Info.Println("Server Exited Properly")
 	os.Exit(0)
 }
+
+// TODO: Make test case for api endpoint

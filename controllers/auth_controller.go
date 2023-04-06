@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
@@ -26,9 +25,7 @@ func NewAuthController(authService services.AuthService) AuthController {
 
 func (controller *AuthControllerImpl) Login(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	authLoginRequest := service.AuthLoginRequest{}
-	decoder := json.NewDecoder(request.Body)
-	err := decoder.Decode(&authLoginRequest)
-	helper.PanicIfError(err)
+	helper.ReadFromRequestBody(request, &authLoginRequest)
 
 	tokenString := controller.AuthService.Login(request.Context(), authLoginRequest)
 	webResponse := service.WebResponse{
@@ -38,9 +35,5 @@ func (controller *AuthControllerImpl) Login(writer http.ResponseWriter, request 
 	}
 
 	writer.Header().Add("X-JWT-Token-Key", tokenString)
-	writer.Header().Add("Content-Type", "application/json")
-
-	encoder := json.NewEncoder(writer)
-	err = encoder.Encode(webResponse)
-	helper.PanicIfError(err)
+	helper.WriteToResponseBody(writer, webResponse)
 }

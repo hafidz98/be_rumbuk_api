@@ -8,15 +8,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// type Auth struct {
-// 	Handler http.HandlerFunc
-// }
-
 func AuthMiddleware(handler httprouter.Handle) httprouter.Handle {
 	return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		tokenString := request.Header.Get("X-JWT-Token-Key")
 		if tokenString == "" {
-			///http.Redirect(writer, request, "/auth/students", http.StatusPermanentRedirect)
 			panic(exception.NewAuthorization(exception.InvalidOrMissingToken))
 		}
 
@@ -25,9 +20,11 @@ func AuthMiddleware(handler httprouter.Handle) httprouter.Handle {
 			panic(exception.NewAuthorization(exception.InvalidOrMissingToken))
 		}
 
-		userData, err := helper.ExtractRoleFromToken(tokenString)
+		userData, err := helper.ExtractUserDataFromToken(tokenString)
+
 		helper.Info.Println(userData)
 		helper.Info.Println(userData.Role)
+
 		if err != nil {
 			panic(exception.NewAuthorization(exception.InvalidCredentials))
 		}
@@ -42,20 +39,7 @@ func AuthMiddleware(handler httprouter.Handle) httprouter.Handle {
 			handler(writer, request, params)
 			return
 		}
-		
+
 		panic(exception.NewAuthorization(exception.InvalidCredentials))
-		//handler(writer, request, params)
 	}
 }
-
-// func (middleware *Auth) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-// 	tokenString := request.Header.Get("X-JWT-Token-Key")
-// 	if tokenString == "" {
-// 		panic(exception.NewAuthorization(exception.InvalidOrMissingToken))
-// 	}
-// 	err := helper.ValidateToken(tokenString)
-// 	if err != nil {
-// 		panic(exception.NewAuthorization(exception.InvalidOrMissingToken))
-// 	}
-// 	middleware.Handler.ServeHTTP(writer, request)
-// }

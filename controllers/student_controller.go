@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	//"github.com/hafidz98/be_rumbuk_api/exception"
@@ -17,7 +16,6 @@ type StudentController interface {
 	Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FetchById(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
-	//Login(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }
 
 type StudentControllerImpl struct {
@@ -30,32 +28,9 @@ func NewStudentController(studentService service.StudentService) StudentControll
 	}
 }
 
-// func (controller *StudentControllerImpl) Login(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-// 	studentLoginRequest := service_model.StudentLoginRequest{}
-// 	decoder := json.NewDecoder(request.Body)
-// 	err := decoder.Decode(&studentLoginRequest)
-// 	helper.PanicIfError(err)
-
-// 	tokenString := controller.StudentService.Login(request.Context(), studentLoginRequest)
-// 	webResponse := service_model.WebResponse{
-// 		Code:   http.StatusOK,
-// 		Status: http.StatusText(http.StatusOK),
-// 		Data:   "Authorized",
-// 	}
-
-// 	//writer.Header().Add("User-Role", "Student")
-// 	writer.Header().Add("X-JWT-Token-Key", tokenString)
-// 	writer.Header().Add("Content-Type", "application/json")
-// 	encoder := json.NewEncoder(writer)
-// 	err = encoder.Encode(webResponse)
-// 	helper.PanicIfError(err)
-// }
-
 func (controller *StudentControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	studentCreateRequest := service_model.StudentCreateRequest{}
-	decoder := json.NewDecoder(request.Body)
-	err := decoder.Decode(&studentCreateRequest)
-	helper.PanicIfError(err)
+	helper.ReadFromRequestBody(request, &studentCreateRequest)
 
 	studentResponse := controller.StudentService.Create(request.Context(), studentCreateRequest)
 	webResponse := service_model.WebResponse{
@@ -64,17 +39,12 @@ func (controller *StudentControllerImpl) Create(writer http.ResponseWriter, requ
 		Data:   studentResponse,
 	}
 
-	writer.Header().Add("Content-Type", "application/json")
-	encoder := json.NewEncoder(writer)
-	err = encoder.Encode(webResponse)
-	helper.PanicIfError(err)
+	helper.WriteToResponseBody(writer, webResponse)
 }
 
 func (controller *StudentControllerImpl) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	studentUpdateRequest := service_model.StudentUpdateRequest{}
-	decoder := json.NewDecoder(request.Body)
-	err := decoder.Decode(&studentUpdateRequest)
-	helper.PanicIfError(err)
+	helper.ReadFromRequestBody(request, &studentUpdateRequest)
 
 	studentUpdateRequest.StudentID = params.ByName("studentId")
 
@@ -85,10 +55,7 @@ func (controller *StudentControllerImpl) Update(writer http.ResponseWriter, requ
 		Data:   studentResponse,
 	}
 
-	writer.Header().Add("Content-Type", "application/json")
-	encoder := json.NewEncoder(writer)
-	err = encoder.Encode(webResponse)
-	helper.PanicIfError(err)
+	helper.WriteToResponseBody(writer, webResponse)
 }
 
 func (controller *StudentControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -100,24 +67,11 @@ func (controller *StudentControllerImpl) Delete(writer http.ResponseWriter, requ
 		Status: http.StatusText(http.StatusOK),
 	}
 
-	writer.Header().Add("Content-Type", "application/json")
-	encoder := json.NewEncoder(writer)
-	err := encoder.Encode(webResponse)
-	helper.PanicIfError(err)
+	helper.WriteToResponseBody(writer, webResponse)
 }
 
 func (controller *StudentControllerImpl) FetchById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	// role := request.Header.Get("X-User-Role")
-	// id := request.Header.Get("X-User-Id")
 	studentId := params.ByName("studentId")
-
-	// if role == "Student" {
-	// 	if studentId != id {
-	// 		panic(exception.NewAuthorization(exception.AccessUnauthorized))
-	// 	}
-	// } else if role != "Admin" && role != "Staff" {
-	// 	panic(exception.NewAuthorization(exception.AccessUnauthorized))
-	// }
 
 	studentResponse := controller.StudentService.FetchById(request.Context(), studentId)
 	webResponse := service_model.WebResponse{
@@ -126,17 +80,10 @@ func (controller *StudentControllerImpl) FetchById(writer http.ResponseWriter, r
 		Data:   studentResponse,
 	}
 
-	writer.Header().Add("Content-Type", "application/json")
-	encoder := json.NewEncoder(writer)
-	err := encoder.Encode(webResponse)
-	helper.PanicIfError(err)
+	helper.WriteToResponseBody(writer, webResponse)
 }
 
 func (controller *StudentControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	// if role := request.Header.Get("X-User-Role"); role != "Admin" && role != "Staff" {
-	// 	panic(exception.NewAuthorization(exception.AccessUnauthorized))
-	// }
-
 	studentResponses := controller.StudentService.FindAll(request.Context())
 
 	webResponse := service_model.WebResponse{
@@ -145,8 +92,5 @@ func (controller *StudentControllerImpl) FindAll(writer http.ResponseWriter, req
 		Data:   studentResponses,
 	}
 
-	writer.Header().Add("Content-Type", "application/json")
-	encoder := json.NewEncoder(writer)
-	err := encoder.Encode(webResponse)
-	helper.PanicIfError(err)
+	helper.WriteToResponseBody(writer, webResponse)
 }

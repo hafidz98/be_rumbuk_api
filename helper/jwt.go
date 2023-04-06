@@ -1,7 +1,6 @@
 package helper
 
 import (
-	//"fmt"
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,6 +28,7 @@ func GenerateJWT(userData *service.GlobalJWTResponse, claims jwt.RegisteredClaim
 
 func ValidateToken(signedToken string) (err error) {
 	var jwtKey = []byte(os.Getenv("JWT_ACCESS_SECRET_KEY"))
+
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&CustomClaims{},
@@ -36,14 +36,16 @@ func ValidateToken(signedToken string) (err error) {
 			return jwtKey, nil
 		},
 	)
+
 	if _, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		return
 	}
 	return
 }
 
-func ExtractRoleFromToken(signedToken string) (*service.GlobalJWTResponse, error) {
+func ExtractUserDataFromToken(signedToken string) (*service.GlobalJWTResponse, error) {
 	var jwtKey = []byte(os.Getenv("JWT_ACCESS_SECRET_KEY"))
+	
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&CustomClaims{},
@@ -51,6 +53,7 @@ func ExtractRoleFromToken(signedToken string) (*service.GlobalJWTResponse, error
 			return jwtKey, nil
 		},
 	)
+
 	if claim, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		return claim.UserData, nil
 	}

@@ -10,10 +10,10 @@ import (
 )
 
 func AuthRoute(db *sql.DB, validate *validator.Validate) *group.RouteGroup {
-	authService :=
-		services.NewAuthService(db, validate)
+	authService := services.NewAuthService(db, validate)
 	authController := controllers.NewAuthController(authService)
 
 	apiAuthRoute := group.New("/auth").POST(authController.Login)
+	
 	return apiAuthRoute
 }

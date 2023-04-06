@@ -38,14 +38,10 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 	defer helper.CommitOrRollback(tx)
 
 	userStaff, err := repositories.NewStaffRepo().FetchById(context, tx, request.UserID)
-
 	match := helper.ComparePassword(userStaff.Password, request.Password)
-	// if !match {
-	// 	panic(exception.NewAuthorization(exception.InvalidCredentials))
-	// }
 
 	if err == nil && match {
-		s := service_model.GlobalJWTResponse{
+		userData := service_model.GlobalJWTResponse{
 			UserID: userStaff.StaffID,
 			Role:   "Staff",
 		}
@@ -55,24 +51,18 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		}
 
-		token, err := helper.GenerateJWT(&s, claims)
+		token, err := helper.GenerateJWT(&userData, claims)
 		helper.PanicIfError(err)
 
-		helper.Info.Println("Token: " + token)
-		helper.Info.Println("Login request granted")
 		return token
 	} else if err == nil && !match {
 		userStudent, err := repositories.NewStudentRepo().FetchBySId(context, tx, request.UserID)
-		if err != nil {
-			panic(exception.NewAuthorization(exception.InvalidCredentials))
-		}
-
 		match := helper.ComparePassword(userStudent.Password, request.Password)
-		if !match {
+		if err != nil || !match {
 			panic(exception.NewAuthorization(exception.InvalidCredentials))
 		}
 
-		s := service_model.GlobalJWTResponse{
+		userData := service_model.GlobalJWTResponse{
 			UserID: userStudent.StudentID,
 			Name:   userStudent.Name,
 			Email:  userStudent.Email,
@@ -84,41 +74,11 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		}
 
-		token, err := helper.GenerateJWT(&s, claims)
+		token, err := helper.GenerateJWT(&userData, claims)
 		helper.PanicIfError(err)
 
 		return token
-	} else {
-		panic(exception.NewAuthorization(exception.InvalidCredentials))
 	}
-
-	//helper.Info.Println("staff: " + userStaff.StaffID + " " + err.Error())
-	// if err != nil {
-	// 	userStudent, err := repositories.NewStudentRepo().FetchBySId(context, tx, request.UserID)
-	// 	if err != nil {
-	// 		panic(exception.NewAuthorization(exception.InvalidCredentials))
-	// 	}
-
-	// 	match := helper.ComparePassword(userStudent.Password, request.Password)
-	// 	if !match {
-	// 		panic(exception.NewAuthorization(exception.InvalidCredentials))
-	// 	}
-
-	// 	s := service_model.GlobalJWTResponse{
-	// 		UserID: userStudent.StudentID,
-	// 		Name:   userStudent.Name,
-	// 		Email:  userStudent.Email,
-	// 		Role:   "Student",
-	// 	}
-
-	// 	claims := jwt.RegisteredClaims{
-	// 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
-	// 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-	// 	}
-
-	// 	token, err := helper.GenerateJWT(&s, claims)
-	// 	helper.PanicIfError(err)
-
-	// 	return token
-	// }
+	
+	panic(exception.NewAuthorization(exception.InvalidCredentials))
 }

@@ -36,7 +36,6 @@ func authError(writer http.ResponseWriter, request *http.Request, err interface{
 	exception, ok := err.(AuthError)
 	if ok {
 		writer.Header().Set("Content-Type", "application/json")
-		//writer.WriteHeader(http.StatusUnauthorized)
 
 		webResponse := service.WebResponse{
 			Code:   http.StatusUnauthorized,
