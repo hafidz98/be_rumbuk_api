@@ -29,7 +29,7 @@ func init() {
 
 func StartNonTLSServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		helper.Info.Println("Redirecting to https://localhost")
+		helper.Info.Println("Redirecting to :443")
 		http.Redirect(w, r, os.Getenv("APP_ADDRESS")+":"+os.Getenv("APP_PORT"), http.StatusTemporaryRedirect)
 	})
 
@@ -49,7 +49,7 @@ func main() {
 	router := httprouter.New()
 	router.PanicHandler = exception.ErrorHandler
 
-	// go StartNonTLSServer()
+	go StartNonTLSServer()
 
 	mainRoute := group.New(basepath).Middleware(middleware.CommonMiddleware).Children(
 		routes.AuthRoute(db, validate),
@@ -67,18 +67,18 @@ func main() {
 		Handler: router,
 	}
 
-	// go func() {
-	// 	if err := server.ListenAndServeTLS("cert/certificate.crt", "cert/private.key"); err != nil && err != http.ErrServerClosed {
-	// 		helper.Error.Println(err)
-	// 	}
-	// }()
-
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			helper.Info.Println(address)
+		if err := server.ListenAndServeTLS("cert/certificate.crt", "cert/private.key"); err != nil && err != http.ErrServerClosed {
 			helper.Error.Println(err)
 		}
 	}()
+
+	// go func() {
+	// 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	// 		// helper.Info.Println(address)
+	// 		helper.Error.Println(err)
+	// 	}
+	// }()
 
 	helper.Info.Printf("Listening and serving on %v\n", server.Addr)
 

@@ -1,6 +1,6 @@
 package domain
 
-//domain representasi dari tabel dalam basis data
+//domain model representasi dari tabel dalam basis data
 
 type Students struct {
 	ID          int

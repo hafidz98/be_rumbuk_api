@@ -19,4 +19,4 @@
 
 tokenizer_test.go
 
-cert/
+#cert/
