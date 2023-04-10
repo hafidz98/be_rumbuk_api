@@ -20,12 +20,11 @@ jobs:
           script: |
             cd /
             cd /home/limitbreak/test
-            sudo docker network rm rumbuk-net
-            sudo docker network create rumbuk-net
             sudo docker rm -f db_mysql || true
             sudo docker build -t mysql_image . -f Dockerfile.db
             sudo docker container run --name db_mysql \
             -e MYSQL_ROOT_PASSWORD='${{secrets.DB_ROOT_PASSWORD}}' \
+            -v mysql:/var/lib/mysql \
             -dit -p 3306:3306 --net=rumbuk-net --hostname=db_mysql mysql_image
 
   build:
