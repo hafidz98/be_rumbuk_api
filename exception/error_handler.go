@@ -11,7 +11,7 @@ import (
 const (
 	AccessUnauthorized    = "Access unauthorized"
 	InvalidOrMissingToken = "Invalid or missing access token"
-	InvalidCredentials    = "Invalid email and password combination"
+	InvalidCredentials    = "Invalid credentials"
 	DuplicateEmail        = "An account with that email already exists"
 )
 
