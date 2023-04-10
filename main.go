@@ -10,7 +10,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/app"
-	// "github.com/hafidz98/be_rumbuk_api/exception"
+
+	"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	middleware "github.com/hafidz98/be_rumbuk_api/middlewares"
 	"github.com/hafidz98/be_rumbuk_api/routes"
@@ -30,7 +31,7 @@ func init() {
 func StartNonTLSServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		helper.Info.Println("Redirecting to :443")
-		http.Redirect(w, r, ":443", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "https://purwacode.my.id", http.StatusTemporaryRedirect)
 	})
 
 	http.ListenAndServe(":80", nil)
@@ -48,7 +49,7 @@ func main() {
 	db := app.NewDB()
 	validate := validator.New()
 	router := httprouter.New()
-	// router.PanicHandler = exception.ErrorHandler
+	router.PanicHandler = exception.ErrorHandler
 
 	go StartNonTLSServer()
 
@@ -103,3 +104,5 @@ func main() {
 }
 
 // TODO: Make test case for api endpoint
+// TODO: Staff api
+// TODO: Multi username login
