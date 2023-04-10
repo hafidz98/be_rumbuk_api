@@ -13,25 +13,28 @@ import (
 // number generator fails to function correctly, in which
 // case the caller should not continue.
 func GenerateRandomBytes(n int) ([]byte, error) {
-    b := make([]byte, n)
-    _, err := rand.Read(b)
-    // Note that err == nil only if we read len(b) bytes.
-    if err != nil {
-        return nil, err
-    }
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	// Note that err == nil only if we read len(b) bytes.
+	if err != nil {
+		return nil, err
+	}
 
-    return b, nil
+	return b, nil
 }
 
 // GenerateRandomString returns a URL-safe, base64 encoded
 // securely generated random string.
 func GenerateRandomString(s int) (string, error) {
-    b, err := GenerateRandomBytes(s)
-    return base64.URLEncoding.EncodeToString(b), err
+	b, err := GenerateRandomBytes(s)
+	return base64.URLEncoding.EncodeToString(b), err
 }
 
-func TestToken(t *testing.T){
-	token, err := GenerateRandomString(32)
+func TestToken(t *testing.T) {
+	token, err := GenerateRandomString(1) // default 32
+    helper.PanicIfError(err)
+	pass, err := helper.GenerateHashedPassword("root")
 	helper.PanicIfError(err)
-	helper.Info.Println(token)
+	helper.Info.Println("token: ", token)
+	helper.Info.Println("pass: ", pass)
 }

@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/app"
-	"github.com/hafidz98/be_rumbuk_api/exception"
+	// "github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	middleware "github.com/hafidz98/be_rumbuk_api/middlewares"
 	"github.com/hafidz98/be_rumbuk_api/routes"
@@ -48,7 +48,7 @@ func main() {
 	db := app.NewDB()
 	validate := validator.New()
 	router := httprouter.New()
-	router.PanicHandler = exception.ErrorHandler
+	// router.PanicHandler = exception.ErrorHandler
 
 	go StartNonTLSServer()
 
