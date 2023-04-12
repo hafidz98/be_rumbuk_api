@@ -26,7 +26,7 @@ jobs:
             -e MYSQL_ROOT_PASSWORD='${{secrets.DB_ROOT_PASSWORD}}' \
             -v mysql:/var/lib/mysql \
             --restart always \
-            -dit -p 3306:3306 --net=rumbuk-net --hostname=db_mysql mysql_image
+            -dit --net=rumbuk-net --hostname=db_mysql mysql_image
 
   build:
     needs: db
