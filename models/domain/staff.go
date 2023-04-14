@@ -7,6 +7,11 @@ type Staff struct {
 	StaffID  string
 	Name     string
 	Role     string
+	Status   string
 	Email    string
 	Password string
+}
+
+type StaffFilter struct {
+	StaffID string
 }
