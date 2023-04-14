@@ -10,6 +10,7 @@ import (
 
 const (
 	AccessUnauthorized    = "Access unauthorized"
+	AccessForbidden       = "Access forbidden"
 	InvalidOrMissingToken = "Invalid or missing access token"
 	InvalidCredentials    = "Invalid credentials"
 	DuplicateEmail        = "An account with that email already exists"
@@ -18,6 +19,10 @@ const (
 func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interface{}) {
 
 	if authError(writer, request, err) {
+		return
+	}
+
+	if accessForbiddenError(writer, request, err) {
 		return
 	}
 
@@ -40,6 +45,24 @@ func authError(writer http.ResponseWriter, request *http.Request, err interface{
 		webResponse := service.WebResponse{
 			Code:   http.StatusUnauthorized,
 			Status: http.StatusText(http.StatusUnauthorized),
+			Data:   exception.Error,
+		}
+
+		helper.WriteToResponseBody(writer, webResponse)
+		return true
+	} else {
+		return false
+	}
+}
+
+func accessForbiddenError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
+	exception, ok := err.(AccessForbiddenError)
+	if ok {
+		writer.Header().Set("Content-Type", "application/json")
+
+		webResponse := service.WebResponse{
+			Code:   http.StatusForbidden,
+			Status: http.StatusText(http.StatusForbidden),
 			Data:   exception.Error,
 		}
 
