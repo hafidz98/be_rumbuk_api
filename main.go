@@ -56,6 +56,7 @@ func main() {
 	mainRoute := group.New(basepath).Middleware(middleware.CommonMiddleware).Children(
 		routes.AuthRoute(db, validate),
 		routes.StudentRoute(db, validate),
+		routes.StaffRoute(db, validate),
 	)
 
 	//helper.Info.Print("\n", mainRoute.Routes().String())
@@ -99,7 +100,7 @@ func main() {
 	if err := server.Shutdown(ctx); err != nil {
 		helper.Error.Fatalf("Server forced to shutdown: %v\n", err)
 	}
-	helper.Info.Println("Server Exited Properly")
+	helper.Info.Println("Server terminated properly")
 	os.Exit(0)
 }
 
