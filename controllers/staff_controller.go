@@ -92,8 +92,8 @@ func (controller *StaffControllerImpl) FetchAllFilter(writer http.ResponseWriter
 	helper.Info.Printf("ctrl page: %v", page)
 
 	per_page, _ := strconv.Atoi(r.Get("per_page"))
-	if per_page == 0 || per_page >= 100 {
-		page = 5
+	if per_page == 0 || per_page > 100 {
+		per_page = 5
 	}
 	helper.Info.Printf("ctrl per_page: %v", per_page)
 

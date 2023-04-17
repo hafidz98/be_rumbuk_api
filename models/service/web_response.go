@@ -3,8 +3,8 @@ package service
 type WebResponse struct {
 	Code   int             `json:"code"`
 	Status string          `json:"status"`
-	Data   interface{}     `json:"data"`
-	Meta   *PaginationMeta `json:"meta"`
+	Data   interface{}     `json:"data,omitempty"`
+	Meta   *PaginationMeta `json:"meta,omitempty"`
 	Links  interface{}     `json:"links,omitempty"`
 }
 
