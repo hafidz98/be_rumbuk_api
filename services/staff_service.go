@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"math"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/exception"
@@ -18,6 +20,7 @@ type StaffService interface {
 	Delete(context context.Context, staffId string)
 	FetchById(context context.Context, staffId string) service_model.StaffResponse
 	FetchAllFilter(context context.Context, filter *domain.FilterParams) []service_model.StaffResponse
+	Pagination(context context.Context, params *domain.FilterParams) (service_model.PaginationMeta, interface{})
 }
 
 type StaffServiceImpl struct {
@@ -133,4 +136,34 @@ func (service *StaffServiceImpl) FetchAllFilter(context context.Context, filter 
 
 	staffs := service.StaffRepository.FetchAllFilter(context, tx, filter)
 	return toStaffResponses(staffs)
+}
+
+func (service *StaffServiceImpl) Pagination(context context.Context, params *domain.FilterParams) (service_model.PaginationMeta, interface{}) {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	staffCount := service.StaffRepository.CountAll(context, tx)
+
+	helper.Warning.Printf("Record count: %v", staffCount)
+
+	totalPage := int(math.Ceil(float64(staffCount) / float64(params.PerPage)))
+
+	meta := &service_model.PaginationMeta{
+		Page:    int(params.Page),
+		PerPage: int(params.PerPage),
+		Total:   totalPage,
+	}
+
+	links := make(map[string]string)
+	links["self"] = fmt.Sprintf("?page=%d&per_page=%d", params.Page, params.PerPage)
+	if params.Page > 1 {
+		links["prev"] = fmt.Sprintf("?page=%d&per_page=%d", params.Page-1, params.PerPage)
+	}
+	if params.Page < uint64(totalPage) {
+		links["next"] = fmt.Sprintf("?page=%d&per_page=%d", params.Page+1, params.PerPage)
+	}
+	links["last"] = fmt.Sprintf("?page=%d&per_page=%d", totalPage, params.PerPage)
+
+	return *meta, links
 }
