@@ -85,22 +85,32 @@ func (controller *StaffControllerImpl) FetchById(writer http.ResponseWriter, req
 
 func (controller *StaffControllerImpl) FetchAllFilter(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	r := request.URL.Query()
-	limit, _ := strconv.Atoi(r.Get("limit"))
-	helper.Info.Printf("ctrl limit: %v", limit)
+	page, _ := strconv.Atoi(r.Get("page"))
+	if page == 0 {
+		page = 1
+	}
+	helper.Info.Printf("ctrl page: %v", page)
 
-	offset, _ := strconv.Atoi(r.Get("offset"))
-	helper.Info.Printf("ctrl offset: %v", offset)
+	per_page, _ := strconv.Atoi(r.Get("per_page"))
+	if per_page == 0 || per_page >= 100 {
+		page = 5
+	}
+	helper.Info.Printf("ctrl per_page: %v", per_page)
 
 	staffFilter := domain.FilterParams{
-		Limit:  uint64(limit),
-		Offset: uint64(offset),
+		Page:    uint64(page),
+		PerPage: uint64(per_page),
 	}
 
 	staffResponse := controller.StaffService.FetchAllFilter(request.Context(), &staffFilter)
+	meta, links := controller.StaffService.Pagination(request.Context(), &staffFilter)
+
 	res := service.WebResponse{
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
 		Data:   staffResponse,
+		Meta:   &meta,
+		Links:  links,
 	}
 	helper.WriteToResponseBody(writer, res)
 

@@ -14,6 +14,7 @@ type StaffRepo interface {
 	Update(context context.Context, tx *sql.Tx, staff domain.Staff) domain.Staff
 	SoftDelete(context context.Context, tx *sql.Tx, staff domain.Staff)
 	Delete(context context.Context, tx *sql.Tx, staff domain.Staff)
+	CountAll(context context.Context, tx *sql.Tx) int
 	FetchAll(context context.Context, tx *sql.Tx) []domain.Staff
 	FetchAllFilter(context context.Context, tx *sql.Tx, filter *domain.FilterParams) []domain.Staff
 	FetchById(context context.Context, tx *sql.Tx, staffID string) (domain.Staff, error)
@@ -28,14 +29,15 @@ func NewStaffRepo() StaffRepo {
 func queryRowsWithFilterBuilder(query string, filter *domain.FilterParams) (q string, f []interface{}, err error) {
 	var filterValues []interface{}
 
+	offset := (filter.Page - 1) * filter.PerPage
 	// pagination
-	if filter.Offset > 0 {
-		filter.Offset = filter.Offset - 1
-	}
-	filterValues = append(filterValues, filter.Limit)
+	// if offset > 0 {
+	// 	offset = offset - 1
+	// }
+	filterValues = append(filterValues, filter.PerPage)
 	//query += "LIMIT ?" + strconv.Itoa(len(filterValues))
 	query += ` LIMIT ? `
-	filterValues = append(filterValues, filter.Offset)
+	filterValues = append(filterValues, offset)
 	//query += "OFFSET ?" + strconv.Itoa(len(filterValues))
 	query += ` OFFSET ? `
 
@@ -148,4 +150,12 @@ func (repo *StaffRepoImpl) FetchById(context context.Context, tx *sql.Tx, staffI
 	}
 
 	return staff, errors.New("staff not found")
+}
+
+func (repo *StaffRepoImpl) CountAll(context context.Context, tx *sql.Tx) int {
+	var count int
+	stmt := `SELECT COUNT(*) FROM staff`
+	err := tx.QueryRowContext(context, stmt).Scan(&count)
+	helper.PanicIfError(err)
+	return count
 }
