@@ -6,7 +6,7 @@ import (
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/models/domain"
-	"github.com/hafidz98/be_rumbuk_api/models/service"
+	service "github.com/hafidz98/be_rumbuk_api/models/rest"
 	"github.com/hafidz98/be_rumbuk_api/services"
 	"github.com/julienschmidt/httprouter"
 )

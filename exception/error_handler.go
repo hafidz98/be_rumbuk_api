@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	"github.com/hafidz98/be_rumbuk_api/models/service"
+	"github.com/hafidz98/be_rumbuk_api/models/rest"
 )
 
 const (
@@ -42,7 +42,7 @@ func authError(writer http.ResponseWriter, request *http.Request, err interface{
 	if ok {
 		writer.Header().Set("Content-Type", "application/json")
 
-		webResponse := service.WebResponse{
+		webResponse := rest.WebResponse{
 			Code:   http.StatusUnauthorized,
 			Status: http.StatusText(http.StatusUnauthorized),
 			Data:   exception.Error,
@@ -60,7 +60,7 @@ func accessForbiddenError(writer http.ResponseWriter, request *http.Request, err
 	if ok {
 		writer.Header().Set("Content-Type", "application/json")
 
-		webResponse := service.WebResponse{
+		webResponse := rest.WebResponse{
 			Code:   http.StatusForbidden,
 			Status: http.StatusText(http.StatusForbidden),
 			Data:   exception.Error,
@@ -79,7 +79,7 @@ func notFoundError(writer http.ResponseWriter, request *http.Request, err interf
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusNotFound)
 
-		webResponse := service.WebResponse{
+		webResponse := rest.WebResponse{
 			Code:   http.StatusNotFound,
 			Status: http.StatusText(http.StatusNotFound),
 			Data:   exception.Error,
@@ -98,7 +98,7 @@ func validationError(writer http.ResponseWriter, request *http.Request, err inte
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusBadRequest)
 
-		webResponse := service.WebResponse{
+		webResponse := rest.WebResponse{
 			Code:   http.StatusBadRequest,
 			Status: http.StatusText(http.StatusBadRequest),
 			Data:   exception.Error(),
@@ -115,7 +115,7 @@ func internalServerError(writer http.ResponseWriter, request *http.Request, err 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusInternalServerError)
 
-	webResponse := service.WebResponse{
+	webResponse := rest.WebResponse{
 		Code:   http.StatusInternalServerError,
 		Status: http.StatusText(http.StatusInternalServerError),
 		Data:   err,
