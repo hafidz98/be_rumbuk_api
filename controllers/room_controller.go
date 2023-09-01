@@ -15,7 +15,9 @@ type RoomController interface {
 	Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
-	FetchAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	FetchAllRooms(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	FetchAllRoomsDetail(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }
 
 type RoomControllerImpl struct {
@@ -63,11 +65,49 @@ func (ctrl *RoomControllerImpl) Update(writer http.ResponseWriter, request *http
 	helper.WriteToResponseBody(writer, webResponse)
 }
 
-func (ctlr *RoomControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (ctrl *RoomControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	roomId := params.ByName("roomId")
+	res, err := strconv.Atoi(roomId)
+	helper.PanicIfError(err)
 
+	ctrl.RoomService.Delete(request.Context(), res)
+	webResponse := rest.WebResponse{
+		Code:   http.StatusNoContent,
+		Status: http.StatusText(http.StatusOK),
+	}
+
+	helper.WriteToResponseBody(writer, webResponse)
 }
 
-func (ctrl *RoomControllerImpl) FetchAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (ctrl *RoomControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	roomId := params.ByName("roomId")
+	res, err := strconv.Atoi(roomId)
+	helper.PanicIfError(err)
+
+	roomResponse := ctrl.RoomService.FetchByID(request.Context(), res)
+	webResponse := rest.WebResponse{
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   roomResponse,
+	}
+
+	helper.WriteToResponseBody(writer, webResponse)
+}
+
+func (ctrl *RoomControllerImpl) FetchAllRooms(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+
+	roomResponses := ctrl.RoomService.FetchAll(request.Context())
+
+	webResponse := rest.WebResponse{
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   roomResponses,
+	}
+
+	helper.WriteToResponseBody(writer, webResponse)
+}
+
+func (ctrl *RoomControllerImpl) FetchAllRoomsDetail(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	rQ := request.URL.Query()
 	dt := time.Now()
 

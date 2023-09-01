@@ -15,7 +15,24 @@ func RoomRoute(db *sql.DB, validate *validator.Validate) *group.RouteGroup {
 	roomService := services.NewRoomService(roomRepository, db, validate)
 	roomCtrl := controllers.NewRoomController(roomService)
 
-	apiRoomRoute := group.New("rooms").GET(roomCtrl.FetchAll)
+	apiRoomRoute := group.New("room").Children(
+		group.New("").GET(roomCtrl.FetchAllRooms).POST(roomCtrl.Create).Children(
+			group.New("/:roomId").GET(roomCtrl.FindById).PATCH(roomCtrl.Update),
+			group.New("/:roomId").DELETE(roomCtrl.Delete),
+		),
+	)
+
+	return apiRoomRoute
+}
+
+func RoomRoute2(db *sql.DB, validate *validator.Validate) *group.RouteGroup {
+	roomRepository := repositories.NewRoomRepo()
+	roomService := services.NewRoomService(roomRepository, db, validate)
+	roomCtrl := controllers.NewRoomController(roomService)
+
+	apiRoomRoute := group.New("rooms").Children(
+		group.New("").GET(roomCtrl.FetchAllRoomsDetail),
+	)
 
 	return apiRoomRoute
 }

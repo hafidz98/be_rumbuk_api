@@ -38,9 +38,13 @@ func NewRoomService(roomRepository repositories.RoomRepo, DB *sql.DB, validate *
 
 func toRoomResponse(room domain.Room) rest.RoomResponse {
 	return rest.RoomResponse{
-		ID:       room.ID,
-		Name:     room.Name,
-		Capacity: room.Capacity,
+		ID:        room.ID,
+		Name:      room.Name,
+		Capacity:  room.Capacity,
+		Building:  room.BuildingID,
+		Floor:     room.FloorID,
+		CreatedAt: room.CreatedAt,
+		UpdatedAt: room.UpdatedAt,
 	}
 }
 
@@ -88,7 +92,18 @@ func (service *RoomServiceImpl) Update(context context.Context, request rest.Roo
 	return toRoomResponse(room)
 }
 
-func (service *RoomServiceImpl) Delete(context context.Context, roomId int) {}
+func (service *RoomServiceImpl) Delete(context context.Context, roomId int) {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	room, err := service.RoomRepository.FetchByRoomID(context, tx, roomId)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	service.RoomRepository.Delete(context, tx, room)
+}
 
 func (service *RoomServiceImpl) FetchAll(context context.Context) []rest.RoomResponse {
 	tx, err := service.DB.Begin()
@@ -105,6 +120,8 @@ func (service *RoomServiceImpl) FetchAll(context context.Context) []rest.RoomRes
 			Capacity: room.Capacity,
 			Building: room.BuildingID,
 			Floor:    room.FloorID,
+			CreatedAt: room.CreatedAt,
+			UpdatedAt: room.UpdatedAt,
 		}
 		roomResponses = append(roomResponses, room)
 	}

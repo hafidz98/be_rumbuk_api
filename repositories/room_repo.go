@@ -26,7 +26,7 @@ func NewRoomRepo() RoomRepo {
 }
 
 func (repo *RoomRepoImpl) Create(context context.Context, tx *sql.Tx, room domain.Room) domain.Room {
-	stmt := "INSERT INTO room(room_name, capacity, building_id, floor_id) VALUES(?.?.?.?)"
+	stmt := "INSERT INTO room(room_name, capacity, building_id, floor_id) VALUES(?,?,?,?)"
 	res, err := tx.ExecContext(context, stmt, room.Name, room.Capacity, room.BuildingID, room.FloorID)
 	helper.PanicIfError(err)
 
@@ -38,8 +38,8 @@ func (repo *RoomRepoImpl) Create(context context.Context, tx *sql.Tx, room domai
 }
 
 func (repo *RoomRepoImpl) Update(context context.Context, tx *sql.Tx, room domain.Room) domain.Room {
-	stmt := "UPDATE room SET room_name = ?, capacity = ?, building_id = ?, floor_id = ? WHERE id = ?"
-	_, err := tx.ExecContext(context, stmt, room.Name, room.Capacity, room.BuildingID, room.FloorID, room.ID)
+	stmt := "UPDATE room SET room_name = ?, capacity = ? WHERE id = ?"
+	_, err := tx.ExecContext(context, stmt, room.Name, room.Capacity, room.ID)
 	helper.PanicIfError(err)
 
 	return room
@@ -47,12 +47,12 @@ func (repo *RoomRepoImpl) Update(context context.Context, tx *sql.Tx, room domai
 
 func (repo *RoomRepoImpl) Delete(context context.Context, tx *sql.Tx, room domain.Room) {
 	stmt := "UPDATE room SET is_deleted = ? WHERE id = ?"
-	_, err := tx.ExecContext(context, stmt, room.ID)
+	_, err := tx.ExecContext(context, stmt, true, room.ID)
 	helper.PanicIfError(err)
 }
 
 func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roomId int) (domain.Room, error) {
-	stmt := "SELECT id, room_name, capacity, building_id, floor_id FROM room WHERE id = ?"
+	stmt := "SELECT id, room_name, capacity, building_id, floor_id, created_at, updated_at FROM room WHERE id = ?"
 	rows, err := tx.QueryContext(context, stmt, roomId)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -65,6 +65,8 @@ func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roo
 			&room.Capacity,
 			&room.BuildingID,
 			&room.FloorID,
+			&room.CreatedAt,
+			&room.UpdatedAt,
 		)
 		helper.PanicIfError(err)
 		return room, nil
@@ -74,7 +76,19 @@ func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roo
 }
 
 func (repo *RoomRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []domain.Room {
-	stmt := "SELECT r.id, r.room_name, r.capacity, r.building_id, r.floor_id, r.created_at FROM room r"
+	stmt := `
+		SELECT
+			r.id,
+			r.room_name,
+			r.capacity,
+			b.id,
+			f.id,
+			r.created_at,
+			r.updated_at
+		FROM room r
+			JOIN floor f ON r.floor_id = f.id
+			JOIN building b on r.building_id = b.id;
+	`
 	rows, err := tx.QueryContext(context, stmt)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -89,6 +103,7 @@ func (repo *RoomRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []domain
 			&room.BuildingID,
 			&room.FloorID,
 			&room.CreatedAt,
+			&room.UpdatedAt,
 		)
 		helper.PanicIfError(err)
 		rooms = append(rooms, room)
@@ -98,39 +113,40 @@ func (repo *RoomRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []domain
 
 func (repo *RoomRepoImpl) FetchAllRoomSpecial(context context.Context, tx *sql.Tx, params string) []domain.Rooms {
 	stmt := `
-	SELECT
-		b.id,
-		b.building_name,
-		f.id,
-		f.floor_name,
-		r.id,
-		r.room_name,
-		r.capacity,
-		ts.id,
-		ts.start_time,
-		ts.end_time,
-		CASE
-			WHEN EXISTS(
-				SELECT 1
-				FROM reservation rsv
-					JOIN room_reserved rr ON rsv.id = rr.reservation_id
-				WHERE
-					rr.room_time_slot_id = rts.id
-					AND rsv.reservation_date = ?
-			) THEN true
-			ELSE false
-		END AS 'reserved'
-	FROM room r
-		JOIN floor f ON r.floor_id = f.id
-		JOIN building b ON b.id = f.building_id
-		JOIN room_time_slot rts ON r.id = rts.room_id
-		JOIN time_slot ts ON rts.time_slot_id = ts.id
-	ORDER BY
-		b.building_name asc,
-		f.floor_name ASC,
-		r.room_name ASC,
-		ts.start_time ASC
+		SELECT
+			b.id,
+			b.building_name,
+			f.id,
+			f.floor_name,
+			r.id,
+			r.room_name,
+			r.capacity,
+			ts.id,
+			ts.start_time,
+			ts.end_time,
+			CASE
+				WHEN EXISTS(
+					SELECT 1
+					FROM reservation_ts rsts
+						JOIN room_time_slot rts ON rsts.room_timeslot_id = rts.id
+					WHERE
+						rts.room_id = r.id AND rts.time_slot_id = ts.id
+						AND rsts.reservation_date = ?
+				) THEN true
+				ELSE false
+			END AS 'reserved'
+		FROM room r
+			JOIN floor f ON r.floor_id = f.id
+			JOIN building b ON b.id = f.building_id
+			JOIN room_time_slot rts ON r.id = rts.room_id
+			JOIN time_slot ts ON rts.time_slot_id = ts.id
+		ORDER BY
+			b.building_name asc,
+			f.floor_name ASC,
+			r.room_name ASC,
+			ts.start_time ASC
 	`
+
 	rows, err := tx.QueryContext(context, stmt, params)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -170,7 +186,7 @@ func (repo *RoomRepoImpl) FetchAllRoomSpecial(context context.Context, tx *sql.T
 }
 
 func (repo *RoomRepoImpl) FetchAllTS(context context.Context, tx *sql.Tx) []domain.TimeSlot {
-	stmt := "SELECT ts.start_time, ts.end_time, ts.created_at FROM time_slot ts"
+	stmt := "SELECT ts.id, ts.start_time, ts.end_time, ts.created_at FROM time_slot ts"
 	rows, err := tx.QueryContext(context, stmt)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -179,6 +195,7 @@ func (repo *RoomRepoImpl) FetchAllTS(context context.Context, tx *sql.Tx) []doma
 	for rows.Next() {
 		ts := domain.TimeSlot{}
 		err := rows.Scan(
+			&ts.ID,
 			&ts.StartTime,
 			&ts.EndTime,
 			&ts.CreatedAt,
