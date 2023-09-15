@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	service_model "github.com/hafidz98/be_rumbuk_api/models/service"
+	service_model "github.com/hafidz98/be_rumbuk_api/models/rest"
 	"github.com/hafidz98/be_rumbuk_api/repositories"
 )
 
@@ -18,14 +18,18 @@ type AuthService interface {
 }
 
 type AuthServiceImpl struct {
-	DB       *sql.DB
-	Validate *validator.Validate
+	StudentRepository repositories.StudentRepo
+	StaffRepository   repositories.StaffRepo
+	DB                *sql.DB
+	Validate          *validator.Validate
 }
 
 func NewAuthService(DB *sql.DB, validate *validator.Validate) AuthService {
 	return &AuthServiceImpl{
-		DB:       DB,
-		Validate: validate,
+		StudentRepository: repositories.NewStudentRepo(),
+		StaffRepository:   repositories.NewStaffRepo(),
+		DB:                DB,
+		Validate:          validate,
 	}
 }
 
@@ -37,8 +41,11 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	userStaff, err := repositories.NewStaffRepo().FetchById(context, tx, request.UserID)
+	userStaff, err := service.StaffRepository.FetchById(context, tx, request.UserID)
 	match := helper.ComparePassword(userStaff.Password, request.Password)
+
+	helper.Error.Printf("%s : %v", userStaff.StaffID, match)
+	helper.Error.Println(err)
 
 	if err == nil && match {
 		userData := service_model.GlobalJWTResponse{
@@ -55,9 +62,12 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 		helper.PanicIfError(err)
 
 		return token
-	} else if err == nil && !match {
-		userStudent, err := repositories.NewStudentRepo().FetchBySId(context, tx, request.UserID)
+	} else if !match {
+		userStudent, err := service.StudentRepository.FetchBySId(context, tx, request.UserID)
 		match := helper.ComparePassword(userStudent.Password, request.Password)
+
+		helper.Error.Printf("%s : %v", userStudent.StudentID, match)
+
 		if err != nil || !match {
 			panic(exception.NewAuthorization(exception.InvalidCredentials))
 		}
@@ -79,6 +89,6 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 
 		return token
 	}
-	
+
 	panic(exception.NewAuthorization(exception.InvalidCredentials))
 }

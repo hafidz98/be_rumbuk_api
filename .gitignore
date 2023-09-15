@@ -17,6 +17,6 @@
 # Project ignore
 *.env
 
-tokenizer_test.go
+/tokenizer_test.go
 
 #cert/

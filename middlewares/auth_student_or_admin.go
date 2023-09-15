@@ -15,7 +15,7 @@ func RequiredStudentOrAdmin(handler httprouter.Handle) httprouter.Handle {
 
 		if role == "Student" {
 			if studentId != id {
-				panic(exception.NewAuthorization(exception.AccessUnauthorized))
+				panic(exception.NewAccessForbidden(exception.AccessForbidden))
 			}
 
 			handler(writer, request, params)
@@ -25,6 +25,6 @@ func RequiredStudentOrAdmin(handler httprouter.Handle) httprouter.Handle {
 			return
 		}
 
-		panic(exception.NewAuthorization(exception.AccessUnauthorized))
+		panic(exception.NewAccessForbidden(exception.AccessForbidden))
 	}
 }

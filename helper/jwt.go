@@ -4,15 +4,15 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/hafidz98/be_rumbuk_api/models/service"
+	"github.com/hafidz98/be_rumbuk_api/models/rest"
 )
 
 type CustomClaims struct {
-	UserData *service.GlobalJWTResponse `json:"user_data"`
+	UserData *rest.GlobalJWTResponse `json:"user_data"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userData *service.GlobalJWTResponse, claims jwt.RegisteredClaims) (tokenString string, err error) {
+func GenerateJWT(userData *rest.GlobalJWTResponse, claims jwt.RegisteredClaims) (tokenString string, err error) {
 	var jwtKey = []byte(os.Getenv("JWT_ACCESS_SECRET_KEY"))
 	//fmt.Printf("key: \t %x \n", jwtKey)
 
@@ -43,9 +43,9 @@ func ValidateToken(signedToken string) (err error) {
 	return
 }
 
-func ExtractUserDataFromToken(signedToken string) (*service.GlobalJWTResponse, error) {
+func ExtractUserDataFromToken(signedToken string) (*rest.GlobalJWTResponse, error) {
 	var jwtKey = []byte(os.Getenv("JWT_ACCESS_SECRET_KEY"))
-	
+
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&CustomClaims{},

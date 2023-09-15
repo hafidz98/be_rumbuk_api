@@ -10,7 +10,7 @@ import (
 func RequiredAdmin(handler httprouter.Handle) httprouter.Handle {
 	return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		if role := request.Header.Get("X-User-Role"); role != "Admin" && role != "Staff" {
-			panic(exception.NewAuthorization(exception.AccessUnauthorized))
+			panic(exception.NewAccessForbidden(exception.AccessForbidden))
 		}
 		handler(writer, request, params)
 	}

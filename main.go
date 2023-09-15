@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"text/template"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/app"
-	"github.com/hafidz98/be_rumbuk_api/exception"
+
+	//"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	middleware "github.com/hafidz98/be_rumbuk_api/middlewares"
 	"github.com/hafidz98/be_rumbuk_api/routes"
@@ -30,7 +32,7 @@ func init() {
 func StartNonTLSServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		helper.Info.Println("Redirecting to :443")
-		http.Redirect(w, r, ":443", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "https://purwacode.my.id", http.StatusTemporaryRedirect)
 	})
 
 	http.ListenAndServe(":80", nil)
@@ -48,14 +50,33 @@ func main() {
 	db := app.NewDB()
 	validate := validator.New()
 	router := httprouter.New()
-	router.PanicHandler = exception.ErrorHandler
+	//router.PanicHandler = exception.ErrorHandler
 
-	go StartNonTLSServer()
+	//go StartNonTLSServer()
 
 	mainRoute := group.New(basepath).Middleware(middleware.CommonMiddleware).Children(
 		routes.AuthRoute(db, validate),
 		routes.StudentRoute(db, validate),
+		routes.StaffRoute(db, validate),
+		routes.RoomRoute(db, validate),
+		routes.RoomRoute2(db, validate),
+		routes.BuildingRoute(db, validate),
 	)
+
+	router.HandlerFunc(http.MethodGet, "/routes", func(w http.ResponseWriter, r *http.Request) {
+		tmpl := template.Must(template.ParseFiles("fe/routes.html"))
+		if err := tmpl.Execute(w, nil); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
+	router.HandlerFunc(http.MethodGet, "/routes/list", func(w http.ResponseWriter, r *http.Request) {
+		var rd []string
+		for _, r := range mainRoute.Routes() {
+			rd = append(rd, r.Path())
+		}
+		helper.WriteToResponseBody(w, rd)
+	})
 
 	//helper.Info.Print("\n", mainRoute.Routes().String())
 
@@ -68,18 +89,18 @@ func main() {
 		Handler: router,
 	}
 
-	go func() {
-		if err := server.ListenAndServeTLS("cert/certificate.crt", "cert/private.key"); err != nil && err != http.ErrServerClosed {
-			helper.Error.Println(err)
-		}
-	}()
-
 	// go func() {
-	// 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-	// 		// helper.Info.Println(address)
+	// 	if err := server.ListenAndServeTLS("cert/certificate.crt", "cert/private.key"); err != nil && err != http.ErrServerClosed {
 	// 		helper.Error.Println(err)
 	// 	}
 	// }()
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			// helper.Info.Println(address)
+			helper.Error.Println(err)
+		}
+	}()
 
 	helper.Info.Printf("Listening and serving on %v\n", server.Addr)
 
@@ -98,8 +119,10 @@ func main() {
 	if err := server.Shutdown(ctx); err != nil {
 		helper.Error.Fatalf("Server forced to shutdown: %v\n", err)
 	}
-	helper.Info.Println("Server Exited Properly")
+	helper.Info.Println("Server terminated properly")
 	os.Exit(0)
 }
 
 // TODO: Make test case for api endpoint
+// TODO: Staff api
+// TODO: Multi username login
