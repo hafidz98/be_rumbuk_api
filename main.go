@@ -59,6 +59,8 @@ func main() {
 		routes.StudentRoute(db, validate),
 		routes.StaffRoute(db, validate),
 		routes.RoomRoute(db, validate),
+		routes.RoomRoute2(db, validate),
+		routes.BuildingRoute(db, validate),
 	)
 
 	router.HandlerFunc(http.MethodGet, "/routes", func(w http.ResponseWriter, r *http.Request) {
