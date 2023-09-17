@@ -8,7 +8,7 @@ import (
 	"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/models/domain"
-	service_model "github.com/hafidz98/be_rumbuk_api/models/service"
+	service_model "github.com/hafidz98/be_rumbuk_api/models/rest"
 	repository "github.com/hafidz98/be_rumbuk_api/repositories"
 )
 

@@ -19,11 +19,11 @@ func NewDB() *sql.DB {
 	dbname := os.Getenv("DB_NAME")
 	driver := os.Getenv("DB_DRIVER")
 
-	//DSN format "root@tcp(localhost:3306)/todos_api_db"
+	//DSN format "root@tcp(localhost:3306)/db_name"
 	dsn := (username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname)
 	helper.Info.Println("Try connect to " + dsn)
 
-	db, err := sql.Open(driver, dsn)
+	db, err := sql.Open(driver, dsn+"?parseTime=true&loc=Asia%2FJakarta")
 	helper.PanicIfError(err)
 
 	err = db.Ping()

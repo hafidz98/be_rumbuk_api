@@ -1,4 +1,4 @@
-package service
+package rest
 
 type StaffCreateRequest struct {
 	StaffID  string `validate:"required" json:"staff_id"`
