@@ -18,6 +18,7 @@ type RoomService interface {
 	Delete(context context.Context, roomId int)
 	FetchAll(context context.Context) []rest.RoomResponse
 	FetchByID(context context.Context, roomId int) rest.RoomResponse
+	
 	FetchAllRooms(context context.Context, params string) []rest.BuildingResponse
 	FetchAllTS(context context.Context) []rest.TimeSlotResponse
 }
