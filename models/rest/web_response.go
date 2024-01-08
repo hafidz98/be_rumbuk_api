@@ -1,4 +1,4 @@
-package service
+package rest
 
 type WebResponse struct {
 	Code   int             `json:"code"`

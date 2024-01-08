@@ -1,8 +1,8 @@
-package service
+package rest
 
-type StudentUpdateRequest struct {
-	StudentID   string `validate:"required" json:"student_id"`
-	Name        string `validate:"required,max=255" json:"name"`
+type StudentResponse struct {
+	StudentID   string `json:"student_id"`
+	Name        string `json:"name"`
 	Gender      string `json:"gender"`
 	BatchYear   int    `json:"batch_year"`
 	Major       string `json:"major"`

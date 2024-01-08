@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	service_model "github.com/hafidz98/be_rumbuk_api/models/service"
+	service_model "github.com/hafidz98/be_rumbuk_api/models/rest"
 	"github.com/hafidz98/be_rumbuk_api/repositories"
 )
 

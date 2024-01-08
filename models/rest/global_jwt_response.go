@@ -1,4 +1,4 @@
-package service
+package rest
 
 type GlobalJWTResponse struct {
 	UserID string `json:"user_id"`
