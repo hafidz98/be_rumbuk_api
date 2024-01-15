@@ -1,0 +1,12 @@
+request schema for room reservation/booking
+{
+    "student_id": "17312187"
+    "activity": "Pelatiahn Seminar Membuat Proposal Skripsi"
+    "reservation_date": 2024-01-28
+    "room_timeslot_id" : 1
+}
+
+1. Tampilkan seleruh data bangunan, lantai, dan ruangan beserta ketersediaan jadwalnya
+2. User memlih jadwal yang terhubung dengan data ruangan
+3. Sistem menyimpan informasi dari id jadwal tersebut
+4. Suatu ruangan pada tanggal tertentu mendapatkan jamnya dari timeslot yang sudah di atur sebelumnya
