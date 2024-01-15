@@ -47,6 +47,7 @@ func (controller *TimeslotControllerImpl) Create(writer http.ResponseWriter, req
 //func (controller *TimeslotControllerImpl) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 //func (controller *TimeslotControllerImpl) Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 
+// Mendapatkan Timeslot berdasarkan referensi id timeslot
 func (controller *TimeslotControllerImpl) GetById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	timeslotId := params.ByName("timeslotId")
 	id, err := strconv.Atoi(timeslotId)
