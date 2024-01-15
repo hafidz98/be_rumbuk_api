@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>API Route List</title>
+    <script>
+        function Route() {
+            var self = this;
+            var $ul = document.getElementById("list-routes");
+
+            var renderData = function (res) {
+                res.forEach(function (each) {
+                    var $li = document.createElement("li");
+                    var $a = document.createElement("a");
+
+                    $li.innerText = "route ";
+                    $li.appendChild($a);
+                    $ul.appendChild($li);
+
+                    $a.href = encodeURI(each);
+                    $a.innerText = each;
+                    $a.target = "_blank";
+                });
+            };
+
+            var getAllListFiles = function () {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/routes/list");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        var json = JSON.parse(xhr.responseText);
+                        renderData(json);
+                    }
+                };
+                xhr.send();
+            };
+
+            self.init = function () {
+                getAllListFiles();
+            };
+        };
+
+        window.onload = function () {
+            new Route().init();
+        };
+    </script>
+</head>
+
+<body>
+    <ul id="list-routes"></ul>
+</body>
+
+</html>

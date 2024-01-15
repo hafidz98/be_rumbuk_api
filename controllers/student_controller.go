@@ -5,7 +5,7 @@ import (
 
 	//"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
-	service_model "github.com/hafidz98/be_rumbuk_api/models/service"
+	service_model "github.com/hafidz98/be_rumbuk_api/models/rest"
 	service "github.com/hafidz98/be_rumbuk_api/services"
 	"github.com/julienschmidt/httprouter"
 )
