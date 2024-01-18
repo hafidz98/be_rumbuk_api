@@ -173,7 +173,7 @@ func (service *RoomServiceImpl) FetchAllRooms(context context.Context, params st
 		if floorIdx == -1 {
 			f := rest.FloorResponse{
 				ID:     data.Floor.ID,
-				Number: data.Floor.Name,
+				Name: data.Floor.Name,
 				Rooms:  []rest.Rooms{},
 			}
 			building.Floors = append(building.Floors, f)
