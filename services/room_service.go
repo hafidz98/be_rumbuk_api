@@ -174,7 +174,7 @@ func (service *RoomServiceImpl) FetchAllRooms(context context.Context, params st
 			f := rest.FloorResponse{
 				ID:     data.Floor.ID,
 				Name: data.Floor.Name,
-				Rooms:  []rest.Rooms{},
+				Rooms:  []rest.RoomResponse{},
 			}
 			building.Floors = append(building.Floors, f)
 			floorIdx = len(building.Floors) - 1
@@ -189,7 +189,7 @@ func (service *RoomServiceImpl) FetchAllRooms(context context.Context, params st
 		}
 
 		if roomsIdx == -1 {
-			r := rest.Rooms{
+			r := rest.RoomResponse{
 				ID:       data.Room.ID,
 				Name:     data.Room.Name,
 				Capacity: data.Room.Capacity,

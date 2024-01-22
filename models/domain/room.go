@@ -10,8 +10,8 @@ type Room struct {
 	Capacity   int
 	BuildingID int
 	FloorID    int
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	CreatedAt  *time.Time
+	UpdatedAt  *time.Time
 }
 
 type RoomTimeSlot struct {
@@ -27,5 +27,5 @@ type Rooms struct {
 	Floor    Floor
 	Room     Room
 	TimeSlot TimeSlot
-	Reserved bool
+	Reserved *bool
 }

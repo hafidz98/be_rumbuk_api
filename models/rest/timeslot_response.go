@@ -5,5 +5,5 @@ type TimeSlotResponse struct {
 	StartTime string `json:"start_time"`
 	EndTime   string `json:"end_time"`
 	Duration  int    `json:"duration"`
-	Reserved  bool   `json:"reserved,omitempty"`
+	Reserved  *bool    `json:"reserved,omitempty"`
 }
