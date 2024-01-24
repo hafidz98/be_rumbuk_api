@@ -15,10 +15,3 @@ type RoomResponse struct {
 	TimeSlot  []TimeSlotResponse `json:"time_slot,omitempty"`
 	Reserved  bool               `json:"reserved,omitempty"`
 }
-
-type Rooms struct {
-	ID       int                `json:"id"`
-	Name     string             `json:"name"`
-	Capacity int                `json:"capacity"`
-	TimeSlot []TimeSlotResponse `json:"time_slot,omitempty"`
-}

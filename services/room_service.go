@@ -18,9 +18,6 @@ type RoomService interface {
 	Delete(context context.Context, roomId int)
 	FetchAll(context context.Context) []rest.RoomResponse
 	FetchByID(context context.Context, roomId int) rest.RoomResponse
-	
-	FetchAllRooms(context context.Context, params string) []rest.BuildingResponse
-	FetchAllTS(context context.Context) []rest.TimeSlotResponse
 }
 
 type RoomServiceImpl struct {
@@ -116,11 +113,11 @@ func (service *RoomServiceImpl) FetchAll(context context.Context) []rest.RoomRes
 	var roomResponses []rest.RoomResponse
 	for _, room := range rooms {
 		room := rest.RoomResponse{
-			ID:       room.ID,
-			Name:     room.Name,
-			Capacity: room.Capacity,
-			Building: room.BuildingID,
-			Floor:    room.FloorID,
+			ID:        room.ID,
+			Name:      room.Name,
+			Capacity:  room.Capacity,
+			Building:  room.BuildingID,
+			Floor:     room.FloorID,
 			CreatedAt: room.CreatedAt,
 			UpdatedAt: room.UpdatedAt,
 		}
@@ -141,100 +138,4 @@ func (service *RoomServiceImpl) FetchByID(context context.Context, roomId int) r
 	}
 
 	return toRoomResponse(room)
-}
-
-func (service *RoomServiceImpl) FetchAllRooms(context context.Context, params string) []rest.BuildingResponse {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
-	defer helper.CommitOrRollback(tx)
-
-	rooms := service.RoomRepository.FetchAllRoomSpecial(context, tx, params)
-
-	buildings := make(map[int]rest.BuildingResponse)
-	for _, data := range rooms {
-		building, ok := buildings[data.Building.ID]
-
-		if !ok {
-			building = rest.BuildingResponse{
-				ID:     data.Building.ID,
-				Name:   data.Building.Name,
-				Floors: []rest.FloorResponse{},
-			}
-		}
-
-		floorIdx := -1
-		for i, f := range building.Floors {
-			if f.ID == data.Floor.ID {
-				floorIdx = i
-				break
-			}
-		}
-
-		if floorIdx == -1 {
-			f := rest.FloorResponse{
-				ID:     data.Floor.ID,
-				Name: data.Floor.Name,
-				Rooms:  []rest.RoomResponse{},
-			}
-			building.Floors = append(building.Floors, f)
-			floorIdx = len(building.Floors) - 1
-		}
-
-		roomsIdx := -1
-		for i, r := range building.Floors[floorIdx].Rooms {
-			if r.ID == data.Room.ID {
-				roomsIdx = i
-				break
-			}
-		}
-
-		if roomsIdx == -1 {
-			r := rest.RoomResponse{
-				ID:       data.Room.ID,
-				Name:     data.Room.Name,
-				Capacity: data.Room.Capacity,
-				TimeSlot: []rest.TimeSlotResponse{},
-			}
-			building.Floors[floorIdx].Rooms = append(building.Floors[floorIdx].Rooms, r)
-			roomsIdx = len(building.Floors[floorIdx].Rooms) - 1
-		}
-
-		ts := rest.TimeSlotResponse{
-			ID:        data.TimeSlot.ID,
-			StartTime: data.TimeSlot.StartTime,
-			EndTime:   data.TimeSlot.EndTime,
-			Reserved:  data.Reserved,
-		}
-
-		building.Floors[floorIdx].Rooms[roomsIdx].TimeSlot = append(building.Floors[floorIdx].Rooms[roomsIdx].TimeSlot, ts)
-
-		buildings[data.Building.ID] = building
-	}
-
-	buildingList := make([]rest.BuildingResponse, 0, len(buildings))
-	for _, b := range buildings {
-		buildingList = append(buildingList, b)
-	}
-
-	return buildingList
-}
-
-func (service *RoomServiceImpl) FetchAllTS(context context.Context) []rest.TimeSlotResponse {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
-	defer helper.CommitOrRollback(tx)
-
-	rooms := service.RoomRepository.FetchAllTS(context, tx)
-	var roomResponses []rest.TimeSlotResponse
-
-	for _, r := range rooms {
-		r := rest.TimeSlotResponse{
-			StartTime: r.StartTime,
-			EndTime:   r.EndTime,
-		}
-
-		roomResponses = append(roomResponses, r)
-	}
-
-	return roomResponses
 }

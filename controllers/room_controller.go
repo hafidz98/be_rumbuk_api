@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/models/rest"
@@ -17,7 +16,6 @@ type RoomController interface {
 	Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FetchAllRooms(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
-	FetchAllRoomsDetail(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }
 
 type RoomControllerImpl struct {
@@ -102,29 +100,6 @@ func (ctrl *RoomControllerImpl) FetchAllRooms(writer http.ResponseWriter, reques
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
 		Data:   roomResponses,
-	}
-
-	helper.WriteToResponseBody(writer, webResponse)
-}
-
-func (ctrl *RoomControllerImpl) FetchAllRoomsDetail(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	rQ := request.URL.Query()
-	dt := time.Now()
-
-	dateRsv := rQ.Get("date")
-	if dateRsv == "" {
-		dateRsv = dt.AddDate(0, 0, 3).Format("2006-01-02")
-	}
-
-	helper.Info.Printf("date: %v", dateRsv)
-	helper.Info.Printf("date: %v", dt)
-
-	roomResponses := ctrl.RoomService.FetchAllRooms(request.Context(), dateRsv)
-
-	webResponse := rest.WebResponse{
-		Code:   http.StatusOK,
-		Status: http.StatusText(http.StatusOK),
-		Data:   map[string]interface{}{"date": dateRsv, "buildings": roomResponses},
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)
