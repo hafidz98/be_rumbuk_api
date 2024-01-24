@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>API Route List</title>
+</head>
+
+<body>
+    <ul>
+        {{range $i, $e := .}}
+        <li>route {{$e.Method}} <a rel="noopener noreferrer" target="_blank" href="http://localhost:8991{{$e.Path}}">{{$e.Path}}</a></li>
+        {{end}}
+    </ul>
+</body>
+
+</html>
