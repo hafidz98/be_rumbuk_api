@@ -12,4 +12,5 @@ type RoomUpdateRequest struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name,omitempty"`
 	Capacity int    `json:"capacity,omitempty"`
+	Status   string `json:"status,omitempty"`
 }

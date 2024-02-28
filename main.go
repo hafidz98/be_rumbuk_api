@@ -59,24 +59,42 @@ func main() {
 		routes.StudentRoute(db, validate),
 		routes.StaffRoute(db, validate),
 		routes.RoomRoute(db, validate),
-		routes.RoomRoute2(db, validate),
 		routes.BuildingRoute(db, validate),
 		routes.TimeslotRoute(db, validate),
+		routes.FloorRoute(db, validate),
+		routes.AvailableRoomRoute(db, validate),
 	)
 
 	router.HandlerFunc(http.MethodGet, "/routes", func(w http.ResponseWriter, r *http.Request) {
-		tmpl := template.Must(template.ParseFiles("fe/routes.html"))
-		if err := tmpl.Execute(w, nil); err != nil {
+		type ListRoute struct {
+			Method string
+			Path string
+		}
+
+		routeList := []ListRoute{}
+		for _, r := range mainRoute.Routes() {
+			routeList = append(routeList, ListRoute{Method: r.Method(), Path: r.Path()})
+		}
+		
+		tmpl := template.Must(template.ParseFiles("fe/routes.view.html"))
+		if err := tmpl.Execute(w, routeList); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 
 	router.HandlerFunc(http.MethodGet, "/routes/list", func(w http.ResponseWriter, r *http.Request) {
-		var rd []string
-		for _, r := range mainRoute.Routes() {
-			rd = append(rd, r.Path())
+
+		type ListRoute struct {
+			Method string `json:"method"`
+			Path string `json:"path"`
 		}
-		helper.WriteToResponseBody(w, rd)
+
+		routeList := []ListRoute{}
+
+		for _, r := range mainRoute.Routes() {
+			routeList = append(routeList, ListRoute{Method: r.Method(), Path: r.Path()})
+		}
+		helper.WriteToResponseBody(w, routeList)
 	})
 
 	//helper.Info.Print("\n", mainRoute.Routes().String())
