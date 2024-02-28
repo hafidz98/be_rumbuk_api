@@ -15,6 +15,7 @@ import (
 type RoomService interface {
 	Create(context context.Context, request rest.RoomCreateRequest) rest.RoomResponse
 	Update(context context.Context, request rest.RoomUpdateRequest) rest.RoomResponse
+	UpdateRoomStatus(context context.Context, request rest.RoomUpdateRequest) rest.RoomResponse
 	Delete(context context.Context, roomId int)
 	FetchAll(context context.Context) []rest.RoomResponse
 	FetchByID(context context.Context, roomId int) rest.RoomResponse
@@ -41,6 +42,7 @@ func toRoomResponse(room domain.Room) rest.RoomResponse {
 		Capacity:  room.Capacity,
 		Building:  room.BuildingID,
 		Floor:     room.FloorID,
+		Status:    room.Status,
 		CreatedAt: room.CreatedAt,
 		UpdatedAt: room.UpdatedAt,
 	}
@@ -90,6 +92,29 @@ func (service *RoomServiceImpl) Update(context context.Context, request rest.Roo
 	return toRoomResponse(room)
 }
 
+func (service *RoomServiceImpl) UpdateRoomStatus(context context.Context, request rest.RoomUpdateRequest) rest.RoomResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	room, err := service.RoomRepository.FetchByRoomID(context, tx, request.ID)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	room = domain.Room{
+		ID:     request.ID,
+		Status: request.Status,
+	}
+
+	room = service.RoomRepository.UpdateRoomStatus(context, tx, room)
+
+	return toRoomResponse(room)
+}
+
 func (service *RoomServiceImpl) Delete(context context.Context, roomId int) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
@@ -118,6 +143,7 @@ func (service *RoomServiceImpl) FetchAll(context context.Context) []rest.RoomRes
 			Capacity:  room.Capacity,
 			Building:  room.BuildingID,
 			Floor:     room.FloorID,
+			Status:    room.Status,
 			CreatedAt: room.CreatedAt,
 			UpdatedAt: room.UpdatedAt,
 		}

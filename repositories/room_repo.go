@@ -12,6 +12,7 @@ import (
 type RoomRepo interface {
 	Create(context context.Context, tx *sql.Tx, room domain.Room) domain.Room
 	Update(context context.Context, tx *sql.Tx, room domain.Room) domain.Room
+	UpdateRoomStatus(context context.Context, tx *sql.Tx, status domain.Room) domain.Room
 	Delete(context context.Context, tx *sql.Tx, room domain.Room)
 	FetchAll(context context.Context, tx *sql.Tx) []domain.Room
 	FetchByRoomID(context context.Context, tx *sql.Tx, roomId int) (domain.Room, error)
@@ -43,6 +44,19 @@ func (repo *RoomRepoImpl) Update(context context.Context, tx *sql.Tx, room domai
 	return room
 }
 
+// Status yang terdapat pada Ruangan.
+//
+// 0 : Ruangan tidak dapat dilakukan proses peminjaman.
+// 1 : (Default) Ruangan dapat dipinjam.
+// 2 : Lain-lain (Dapat diatur kemudian).
+func (repo *RoomRepoImpl) UpdateRoomStatus(context context.Context, tx *sql.Tx, room domain.Room) domain.Room {
+	stmt := "UPDATE room SET status = ? WHERE id = ?"
+	_, err := tx.ExecContext(context, stmt, room.Status, room.ID)
+	helper.PanicIfError(err)
+
+	return room
+}
+
 func (repo *RoomRepoImpl) Delete(context context.Context, tx *sql.Tx, room domain.Room) {
 	stmt := "UPDATE room SET is_deleted = ? WHERE id = ?"
 	_, err := tx.ExecContext(context, stmt, true, room.ID)
@@ -50,7 +64,7 @@ func (repo *RoomRepoImpl) Delete(context context.Context, tx *sql.Tx, room domai
 }
 
 func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roomId int) (domain.Room, error) {
-	stmt := "SELECT id, room_name, capacity, building_id, floor_id, created_at, updated_at FROM room WHERE id = ?"
+	stmt := "SELECT id, room_name, capacity, building_id, floor_id, status, created_at, updated_at FROM room WHERE id = ?"
 	rows, err := tx.QueryContext(context, stmt, roomId)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -63,6 +77,7 @@ func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roo
 			&room.Capacity,
 			&room.BuildingID,
 			&room.FloorID,
+			&room.Status,
 			&room.CreatedAt,
 			&room.UpdatedAt,
 		)
@@ -74,13 +89,15 @@ func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roo
 }
 
 func (repo *RoomRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []domain.Room {
-	stmt := `
+	stmt :=
+		`
 		SELECT
 			r.id,
 			r.room_name,
 			r.capacity,
 			b.id,
 			f.id,
+			r.status,
 			r.created_at,
 			r.updated_at
 		FROM room r
@@ -100,6 +117,7 @@ func (repo *RoomRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []domain
 			&room.Capacity,
 			&room.BuildingID,
 			&room.FloorID,
+			&room.Status,
 			&room.CreatedAt,
 			&room.UpdatedAt,
 		)

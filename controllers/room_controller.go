@@ -13,6 +13,7 @@ import (
 type RoomController interface {
 	Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	UpdateRoomStatus(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	Delete(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	FetchAllRooms(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
@@ -43,6 +44,7 @@ func (ctrl *RoomControllerImpl) Create(writer http.ResponseWriter, request *http
 
 	helper.WriteToResponseBody(writer, webResponse)
 }
+
 func (ctrl *RoomControllerImpl) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	roomUpdateRequest := rest.RoomUpdateRequest{}
 	helper.ReadFromRequestBody(request, &roomUpdateRequest)
@@ -52,6 +54,26 @@ func (ctrl *RoomControllerImpl) Update(writer http.ResponseWriter, request *http
 
 	roomUpdateRequest.ID = id
 	ctrl.RoomService.Update(request.Context(), roomUpdateRequest)
+
+	roomResponse := ctrl.RoomService.FetchByID(request.Context(), id)
+	webResponse := rest.WebResponse{
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   roomResponse,
+	}
+
+	helper.WriteToResponseBody(writer, webResponse)
+}
+
+func (ctrl *RoomControllerImpl) UpdateRoomStatus(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	roomUpdateRequest := rest.RoomUpdateRequest{}
+	helper.ReadFromRequestBody(request, &roomUpdateRequest)
+
+	id, err := strconv.Atoi(params.ByName("roomId"))
+	helper.PanicIfError(err)
+
+	roomUpdateRequest.ID = id
+	ctrl.RoomService.UpdateRoomStatus(request.Context(), roomUpdateRequest)
 
 	roomResponse := ctrl.RoomService.FetchByID(request.Context(), id)
 	webResponse := rest.WebResponse{

@@ -10,6 +10,7 @@ type Room struct {
 	Capacity   int
 	BuildingID int
 	FloorID    int
+	Status     string
 	CreatedAt  *time.Time
 	UpdatedAt  *time.Time
 }
