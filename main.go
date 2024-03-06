@@ -63,6 +63,7 @@ func main() {
 		routes.TimeslotRoute(db, validate),
 		routes.FloorRoute(db, validate),
 		routes.AvailableRoomRoute(db, validate),
+		routes.ReservationRoute(db, validate),
 	)
 
 	router.HandlerFunc(http.MethodGet, "/routes", func(w http.ResponseWriter, r *http.Request) {

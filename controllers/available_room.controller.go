@@ -33,12 +33,12 @@ func (controller *AvailableRoomControllerImpl) FetchAllAvailableRoom(writer http
 		dateRsv = dt.AddDate(0, 0, 3).Format("2006-01-02")
 	}
 
-	helper.Info.Printf("date: %v", dateRsv)
-	helper.Info.Printf("date: %v", dt)
+	//helper.Info.Printf("date: %v", dateRsv)
+	//helper.Info.Printf("date: %v", dt)
 
 	availableRoomResponses := controller.AvailableRoomService.GetAllAvailableRoom(request.Context(), dateRsv)
 
-	helper.Info.Printf("Room Data: %v", availableRoomResponses)
+	//helper.Info.Printf("Room Data: %v", availableRoomResponses)
 	
 	webResponse := rest.WebResponse{
 		Code:   http.StatusOK,

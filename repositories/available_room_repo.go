@@ -34,6 +34,7 @@ func (repo *AvailableRoomRepoImpl) SelectAllAvailableRoom(context context.Contex
 			ts.start_time,
 			ts.end_time,
 			ts.duration,
+			rts.id,
 			CASE
 				WHEN EXISTS(
 					SELECT 1
@@ -81,6 +82,7 @@ func (repo *AvailableRoomRepoImpl) SelectAllAvailableRoom(context context.Contex
 			&timeslot.StartTime,
 			&timeslot.EndTime,
 			&timeslot.Duration,
+			&availableroom.RoomTimeSlotID,
 			&availableroom.Reserved,
 		)
 

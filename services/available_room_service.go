@@ -95,6 +95,7 @@ func (service *AvailableRoomServiceImpl) GetAllAvailableRoom(context context.Con
 			EndTime:   data.TimeSlot.EndTime,
 			Duration:  data.TimeSlot.Duration,
 			Reserved:  data.Reserved,
+			RoomTSID:  data.RoomTimeSlotID,
 		}
 
 		//helper.Info.Printf("Room Data: %v", data.Reserved)
