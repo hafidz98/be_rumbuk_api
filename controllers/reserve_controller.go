@@ -30,12 +30,18 @@ func (controller *ReservationControllerImpl) Create(writer http.ResponseWriter, 
 	reservationCreateRequest := rest.ReserveCreateRequest{}
 	helper.ReadFromRequestBody(request, &reservationCreateRequest)
 
-	reserve := controller.ReserveService.CreateReservation(request.Context(), reservationCreateRequest)
+	reserve, msg := controller.ReserveService.CreateReservation(request.Context(), reservationCreateRequest)
+
+	type data struct{
+		Msg string `json:"message"`
+	}
+
+	message := data{Msg: msg}	
 
 	webResponse := rest.WebResponse{
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
-		Data:   reserve,
+		Data:   []interface{}{reserve, message},
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)

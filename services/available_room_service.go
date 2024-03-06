@@ -12,6 +12,7 @@ import (
 
 type AvailableRoomService interface {
 	GetAllAvailableRoom(context context.Context, params string) []rest.AvailabeRoomResponse
+	GetAvailableRoom(context context.Context, date string, roomTimeslotId int) bool
 }
 
 type AvailableRoomServiceImpl struct {
@@ -112,4 +113,13 @@ func (service *AvailableRoomServiceImpl) GetAllAvailableRoom(context context.Con
 	}
 
 	return availableRoomList
+}
+
+func (service *AvailableRoomServiceImpl) GetAvailableRoom(context context.Context, date string, roomTimeslotId int) bool {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	ok := service.AvailableRoomRepo.SelectIsReserveRoom(context, tx, date, roomTimeslotId)
+	return ok
 }

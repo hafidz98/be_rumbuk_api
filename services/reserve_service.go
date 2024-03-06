@@ -17,7 +17,7 @@ import (
 
 type ReservationService interface {
 	SelectReservationByStudentID(context context.Context, studentId string) []rest.ReserveResponse
-	CreateReservation(context context.Context, request rest.ReserveCreateRequest) rest.ReserveResponse
+	CreateReservation(context context.Context, request rest.ReserveCreateRequest) (rest.ReserveResponse, string)
 }
 
 type ReservationServiceImpl struct {
@@ -46,7 +46,7 @@ func toReserveResponse(reserve domain.Reservation, room rest.RoomData, statusTex
 	}
 }
 
-func (service *ReservationServiceImpl) CreateReservation(context context.Context, request rest.ReserveCreateRequest) rest.ReserveResponse {
+func (service *ReservationServiceImpl) CreateReservation(context context.Context, request rest.ReserveCreateRequest) (rest.ReserveResponse, string) {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
@@ -61,6 +61,11 @@ func (service *ReservationServiceImpl) CreateReservation(context context.Context
 		RoomTimeSlotID: request.RoomTimeSlotID,
 	}
 
+	check := repositories.NewAvailableRoomRepo().SelectIsReserveRoom(context,tx, request.BookDate.Format("2006-01-02"), request.RoomTimeSlotID)
+	if check {
+		return rest.ReserveResponse{}, "alreadey reserved"
+	}
+
 	reserve = service.ReserveRepo.Create(context, tx, reserve)
 
 	roomData, err := service.ReserveRepo.SelectReservationById(context, tx, reserve.RoomTimeSlotID)
@@ -70,7 +75,7 @@ func (service *ReservationServiceImpl) CreateReservation(context context.Context
 
 	reserve.Status = "1"
 
-	return toReserveResponse(reserve, roomData, statusText(reserve.Status))
+	return toReserveResponse(reserve, roomData, statusText(reserve.Status)), ""
 }
 
 func (service *ReservationServiceImpl) SelectReservationByStudentID(context context.Context, studentId string) []rest.ReserveResponse {
@@ -136,9 +141,9 @@ func dayEqualZero(daysDifference float64) bool {
 	return daysDifference == 0
 }
 
-func dayGreaterThanZero(daysDifference float64) bool {
-	return daysDifference >= 0
-}
+// func dayGreaterThanZero(daysDifference float64) bool {
+// 	return daysDifference >= 0
+// }
 
 func dayLowerThanZero(daysDifference float64) bool {
 	return daysDifference <= 0

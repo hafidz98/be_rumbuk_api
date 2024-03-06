@@ -2,8 +2,7 @@ package rest
 
 import (
 	"time"
-	//"github.com/hafidz98/be_rumbuk_api/utils"
-)//
+)
 
 type ReserveCreateRequest struct {
 	BookDate       time.Time `json:"booking_date"`
