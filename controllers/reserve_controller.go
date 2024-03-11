@@ -12,6 +12,7 @@ import (
 
 type ReservationController interface {
 	Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
+	CancelReservation(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	GetReservationByStudentID(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 	//GetAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params)
 }
@@ -48,7 +49,16 @@ func (controller *ReservationControllerImpl) Create(writer http.ResponseWriter, 
 }
 
 func (controller *ReservationControllerImpl) GetReservationByStudentID(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	studentId := params.ByName("studentId")
+	studentIdParam := params.ByName("studentId")
+	studentIdBody := rest.StudentDataRequest{}
+	helper.ReadFromRequestBody(request, &studentIdBody)
+
+	var studentId string
+	if studentIdParam == "" {
+		studentId = studentIdBody.StudentID
+	} else {
+		studentId = studentIdParam
+	}
 
 	reservationResponse := controller.ReserveService.SelectReservationByStudentID(request.Context(), studentId)
 
@@ -56,6 +66,21 @@ func (controller *ReservationControllerImpl) GetReservationByStudentID(writer ht
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
 		Data:   reservationResponse,
+	}
+
+	helper.WriteToResponseBody(writer, webResponse)
+}
+
+func (controller *ReservationControllerImpl) CancelReservation(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	reservationUpdateRequest := rest.ReserveUpdateRequest{}
+	helper.ReadFromRequestBody(request, &reservationUpdateRequest)
+
+	controller.ReserveService.CancelReservation(request.Context(), reservationUpdateRequest.ReservationID)
+
+	webResponse := rest.WebResponse{
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   "Ok",
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)

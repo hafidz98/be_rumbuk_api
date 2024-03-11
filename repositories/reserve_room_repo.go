@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	//"fmt"
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
@@ -13,8 +14,8 @@ import (
 
 type ReserveRoomRepo interface {
 	//SelectAllReserveRoom()
-	//SelectReserveRoomById()
-	SelectReservationById(context context.Context, tx *sql.Tx, roomTimeSlotId int) (rest.RoomData, error)
+	SelectByReservationId(context context.Context, tx *sql.Tx, reservationId int) (domain.Reservation, error)
+	SelectRoomByRTSId(context context.Context, tx *sql.Tx, roomTimeSlotId int) (rest.RoomData, error)
 	SelectReservationByStudentId(context context.Context, tx *sql.Tx, studentId string) []domain.Reservation
 	Create(context context.Context, tx *sql.Tx, reserve domain.Reservation) domain.Reservation
 	UpdateStatus(context context.Context, tx *sql.Tx, reserve domain.Reservation) domain.Reservation
@@ -62,7 +63,7 @@ func (repo *ReserveRoomRepoImpl) UpdateStatus(context context.Context, tx *sql.T
 	return reserve
 }
 
-func (repo *ReserveRoomRepoImpl) SelectReservationById(context context.Context, tx *sql.Tx, roomTimeSlotId int) (rest.RoomData, error) {
+func (repo *ReserveRoomRepoImpl) SelectRoomByRTSId(context context.Context, tx *sql.Tx, roomTimeSlotId int) (rest.RoomData, error) {
 	query :=
 		`
 		SELECT
@@ -97,7 +98,7 @@ func (repo *ReserveRoomRepoImpl) SelectReservationById(context context.Context, 
 		return roomData, nil
 	}
 
-	return roomData, errors.New("not found")
+	return roomData, errors.New("room data not found")
 }
 
 func (repo *ReserveRoomRepoImpl) SelectReservationByStudentId(context context.Context, tx *sql.Tx, studentId string) []domain.Reservation {
@@ -127,7 +128,34 @@ func (repo *ReserveRoomRepoImpl) SelectReservationByStudentId(context context.Co
 		reservation = append(reservation, resData)
 	}
 
-	//fmt.Printf("Data Repo: %v\n", reservation)
-
 	return reservation
+}
+
+func (repo *ReserveRoomRepoImpl) SelectByReservationId(context context.Context, tx *sql.Tx, reservationId int) (domain.Reservation, error) {
+	query :=
+		`
+		SELECT res.id, res.student_id, res.reservation_date, res.activity, res.status, res.room_timeslot_id
+		FROM reservation_ts res
+		JOIN student s ON res.student_id = s.student_id
+		WHERE res.id = ?;
+	`
+	row, err := tx.QueryContext(context, query, reservationId)
+	helper.PanicIfError(err)
+	defer row.Close()
+
+	resData := domain.Reservation{}
+	if row.Next() {
+		err := row.Scan(
+			&resData.ID,
+			&resData.StudentID,
+			&resData.BookDate,
+			&resData.Activity,
+			&resData.Status,
+			&resData.RoomTimeSlotID,
+		)
+		helper.PanicIfError(err)
+		return resData, nil
+	}
+
+	return resData, errors.New("reservation not found")
 }

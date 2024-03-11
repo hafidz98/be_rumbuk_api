@@ -18,6 +18,7 @@ import (
 type ReservationService interface {
 	SelectReservationByStudentID(context context.Context, studentId string) []rest.ReserveResponse
 	CreateReservation(context context.Context, request rest.ReserveCreateRequest) (rest.ReserveResponse, string)
+	CancelReservation(context context.Context, reservationId int)
 }
 
 type ReservationServiceImpl struct {
@@ -61,14 +62,14 @@ func (service *ReservationServiceImpl) CreateReservation(context context.Context
 		RoomTimeSlotID: request.RoomTimeSlotID,
 	}
 
-	check := repositories.NewAvailableRoomRepo().SelectIsReserveRoom(context,tx, request.BookDate.Format("2006-01-02"), request.RoomTimeSlotID)
+	check := repositories.NewAvailableRoomRepo().SelectIsReserveRoom(context, tx, request.BookDate.Format("2006-01-02"), request.RoomTimeSlotID)
 	if check {
 		return rest.ReserveResponse{}, "alreadey reserved"
 	}
 
 	reserve = service.ReserveRepo.Create(context, tx, reserve)
 
-	roomData, err := service.ReserveRepo.SelectReservationById(context, tx, reserve.RoomTimeSlotID)
+	roomData, err := service.ReserveRepo.SelectRoomByRTSId(context, tx, reserve.RoomTimeSlotID)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
@@ -94,7 +95,7 @@ func (service *ReservationServiceImpl) SelectReservationByStudentID(context cont
 		daysDifference := math.Ceil(reservationDate.Sub(localDate).Hours() / 24)
 		fmt.Printf("Tanggal Lokal: %v, Tanggal Reservasi: %v, Selisih hari: %v\n\n", localDate, reservationDate, daysDifference)
 
-		roomData, err := service.ReserveRepo.SelectReservationById(context, tx, res.RoomTimeSlotID)
+		roomData, err := service.ReserveRepo.SelectRoomByRTSId(context, tx, res.RoomTimeSlotID)
 		if err != nil {
 			panic(exception.NewNotFoundError(err.Error()))
 		}
@@ -117,9 +118,26 @@ func (service *ReservationServiceImpl) SelectReservationByStudentID(context cont
 		resData = append(resData, toReserveResponse(res, roomData, statusText(res.Status)))
 	}
 
-	//fmt.Printf("Data %v\n", resData)
-
 	return resData
+}
+
+func (service *ReservationServiceImpl) CancelReservation(context context.Context, reservationId int) {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	reservation, err := service.ReserveRepo.SelectByReservationId(context, tx, reservationId)
+	helper.PanicIfError(err)
+
+	reservation = domain.Reservation{
+		ID:     reservationId,
+		Status: "0",
+	}
+
+	// roomData, err := service.ReserveRepo.SelectRoomByRTSId(context, tx, reservation.RoomTimeSlotID)
+	// helper.PanicIfError(err)
+
+	service.ReserveRepo.UpdateStatus(context, tx, reservation)
 }
 
 func statusText(statusCode string) string {
@@ -150,6 +168,5 @@ func dayLowerThanZero(daysDifference float64) bool {
 }
 
 func timeInBetwen(localTime, startTime, endTime string) bool {
-	//localTime := "09:00"
 	return localTime >= startTime && localTime <= endTime
 }
