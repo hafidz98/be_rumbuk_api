@@ -27,11 +27,11 @@ func (controller *AuthControllerImpl) Login(writer http.ResponseWriter, request 
 	authLoginRequest := service.AuthLoginRequest{}
 	helper.ReadFromRequestBody(request, &authLoginRequest)
 
-	tokenString := controller.AuthService.Login(request.Context(), authLoginRequest)
+	userId, tokenString := controller.AuthService.Login(request.Context(), authLoginRequest)
 	webResponse := service.WebResponse{
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
-		Data:   "Authorized",
+		Data:   map[string]interface{}{"message": "Authorized","user_id":userId},
 	}
 
 	writer.Header().Add("X-JWT-Token-Key", tokenString)

@@ -33,16 +33,17 @@ func (controller *ReservationControllerImpl) Create(writer http.ResponseWriter, 
 
 	reserve, msg := controller.ReserveService.CreateReservation(request.Context(), reservationCreateRequest)
 
-	type data struct{
-		Msg string `json:"message"`
-	}
+	// type data struct {
+	// 	Msg string `json:"message,omitempty"`
+	// }
 
-	message := data{Msg: msg}	
+	//message := data{Msg: msg}
 
 	webResponse := rest.WebResponse{
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
-		Data:   []interface{}{reserve, message},
+		Data:   map[string]interface{}{"reservation": reserve},
+		Msg:    msg,
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)
@@ -80,7 +81,7 @@ func (controller *ReservationControllerImpl) CancelReservation(writer http.Respo
 	webResponse := rest.WebResponse{
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
-		Data:   "Ok",
+		Data:   map[string]interface{}{"message": "Ok"},
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)

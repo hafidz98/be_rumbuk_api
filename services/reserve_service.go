@@ -55,16 +55,19 @@ func (service *ReservationServiceImpl) CreateReservation(context context.Context
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
+	t, err := time.Parse("2006-01-02", request.BookDate)
+	helper.PanicIfError(err)
+
 	reserve := domain.Reservation{
 		StudentID:      request.StudentID,
 		Activity:       request.Activity,
-		BookDate:       request.BookDate,
+		BookDate:       t,
 		RoomTimeSlotID: request.RoomTimeSlotID,
 	}
 
-	check := repositories.NewAvailableRoomRepo().SelectIsReserveRoom(context, tx, request.BookDate.Format("2006-01-02"), request.RoomTimeSlotID)
+	check := repositories.NewAvailableRoomRepo().SelectIsReserveRoom(context, tx, request.BookDate, request.RoomTimeSlotID)
 	if check {
-		return rest.ReserveResponse{}, "alreadey reserved"
+		return rest.ReserveResponse{}, "alreadey_reserved"
 	}
 
 	reserve = service.ReserveRepo.Create(context, tx, reserve)

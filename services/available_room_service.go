@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"sort"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/helper"
@@ -36,12 +37,12 @@ func (service *AvailableRoomServiceImpl) GetAllAvailableRoom(context context.Con
 
 	rooms := service.AvailableRoomRepo.SelectAllAvailableRoom(context, tx, params)
 
-	//helper.Info.Printf("Rooms Data: %v", rooms)
+	//helper.Info.Printf("[1] Rooms Data: %v", rooms)
 
 	availableRoom := make(map[int]rest.AvailabeRoomResponse)
 	for _, data := range rooms {
 
-		//helper.Info.Printf("Room Data: %v", data)
+		//helper.Info.Printf("[2] Room Data: %v", data)
 
 		building, ok := availableRoom[data.Building.ID]
 
@@ -106,11 +107,18 @@ func (service *AvailableRoomServiceImpl) GetAllAvailableRoom(context context.Con
 		availableRoom[data.Building.ID] = building
 	}
 
+	//helper.Info.Printf("[3] Room Data 3: %v", availableRoom)
+
 	availableRoomList := make([]rest.AvailabeRoomResponse, 0, len(availableRoom))
 	for _, b := range availableRoom {
 		availableRoomList = append(availableRoomList, b)
 		//helper.Info.Printf("Room Data: %v", b)
 	}
+	helper.Info.Printf("[4] Room Data 3: %v", availableRoomList)
+
+	sort.Slice(availableRoomList, func(i, j int) bool {
+		return availableRoomList[i].Name < availableRoomList[j].Name
+	})
 
 	return availableRoomList
 }

@@ -14,7 +14,7 @@ import (
 )
 
 type AuthService interface {
-	Login(context context.Context, request service_model.AuthLoginRequest) (tokenString string)
+	Login(context context.Context, request service_model.AuthLoginRequest) (userId, tokenString string)
 }
 
 type AuthServiceImpl struct {
@@ -33,7 +33,7 @@ func NewAuthService(DB *sql.DB, validate *validator.Validate) AuthService {
 	}
 }
 
-func (service *AuthServiceImpl) Login(context context.Context, request service_model.AuthLoginRequest) (tokenString string) {
+func (service *AuthServiceImpl) Login(context context.Context, request service_model.AuthLoginRequest) (userId, tokenString string) {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
@@ -61,7 +61,7 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 		token, err := helper.GenerateJWT(&userData, claims)
 		helper.PanicIfError(err)
 
-		return token
+		return userData.UserID, token
 	} else if !match {
 		userStudent, err := service.StudentRepository.FetchBySId(context, tx, request.UserID)
 		match := helper.ComparePassword(userStudent.Password, request.Password)
@@ -87,7 +87,7 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 		token, err := helper.GenerateJWT(&userData, claims)
 		helper.PanicIfError(err)
 
-		return token
+		return userData.UserID, token
 	}
 
 	panic(exception.NewAuthorization(exception.InvalidCredentials))
