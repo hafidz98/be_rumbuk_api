@@ -62,12 +62,15 @@ func (service *StaffServiceImpl) Create(context context.Context, request service
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
+	password, err := helper.GenerateHashedPassword(request.Password)
+	helper.PanicIfError(err)
+
 	staff := domain.Staff{
 		StaffID:  request.StaffID,
 		Name:     request.Name,
 		Role:     request.Role,
 		Email:    request.Email,
-		Password: request.Password,
+		Password: password,
 	}
 
 	staff = service.StaffRepository.Create(context, tx, staff)
@@ -95,8 +98,8 @@ func (service *StaffServiceImpl) Update(context context.Context, request service
 		Email:   request.Email,
 	}
 
-	staff = service.StaffRepository.Update(context, tx, staff)
-	return toStaffResponse(staff)
+	updatedStaff := service.StaffRepository.Update(context, tx, staff)
+	return toStaffResponse(updatedStaff)
 }
 
 func (service *StaffServiceImpl) Delete(context context.Context, staffId string) {
@@ -109,9 +112,11 @@ func (service *StaffServiceImpl) Delete(context context.Context, staffId string)
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	staff = domain.Staff{
-		Status: "0",
-	}
+	// staff = domain.Staff{
+	// 	Status: "0",
+	// }
+
+	staff.Status = "0"
 
 	service.StaffRepository.SoftDelete(context, tx, staff)
 }

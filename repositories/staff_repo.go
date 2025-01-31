@@ -46,7 +46,7 @@ func queryRowsWithFilterBuilder(query string, filter *domain.FilterParams) (q st
 
 func (repo *StaffRepoImpl) Create(context context.Context, tx *sql.Tx, staff domain.Staff) domain.Staff {
 	stmt := "INSERT INTO staff(staff_id, name, role, status, email, password) VALUES(?,?,?,?,?,?)"
-	result, err := tx.ExecContext(context, stmt, staff.StaffID, staff.Name, staff.Role, staff.Status, staff.Email, staff.Password)
+	result, err := tx.ExecContext(context, stmt, staff.StaffID, staff.Name, staff.Role, 1, staff.Email, staff.Password)
 	helper.PanicIfError(err)
 
 	id, err := result.LastInsertId()
@@ -131,8 +131,8 @@ func (repo *StaffRepoImpl) FetchAllFilter(context context.Context, tx *sql.Tx, f
 }
 
 func (repo *StaffRepoImpl) FetchById(context context.Context, tx *sql.Tx, staffID string) (domain.Staff, error) {
-	query := "SELECT staff_id, name, role, email, password FROM staff WHERE staff_id=? & status = 1"
-	rows, err := tx.QueryContext(context, query, staffID)
+	query := "SELECT staff_id, name, role, email, password FROM staff WHERE staff_id=? AND status = ?"
+	rows, err := tx.QueryContext(context, query, staffID, 1)
 	helper.PanicIfError(err)
 	defer rows.Close()
 

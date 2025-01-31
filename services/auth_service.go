@@ -42,6 +42,10 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 	defer helper.CommitOrRollback(tx)
 
 	userStaff, err := service.StaffRepository.FetchById(context, tx, request.UserID)
+
+	helper.Error.Printf("ID %s : %s", userStaff.StaffID, request.UserID)
+	helper.Error.Printf("Pass %s : %s", userStaff.Password, request.Password)
+
 	match := helper.ComparePassword(userStaff.Password, request.Password)
 
 	helper.Error.Printf("%s : %v", userStaff.StaffID, match)
@@ -54,7 +58,7 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 		}
 
 		claims := jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		}
 

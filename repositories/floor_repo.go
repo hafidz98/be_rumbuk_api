@@ -56,7 +56,7 @@ func (repo *FloorRepoImpl) SelectById(context context.Context, tx *sql.Tx, floor
 }
 
 func (repo *FloorRepoImpl) SelectAll(context context.Context, tx *sql.Tx) []domain.Floor {
-	query := "SELECT id, floor_name, building_id, created_at, updated_at FROM floor"
+	query := "SELECT floor.id, floor.floor_name, floor.building_id, floor.created_at, floor.updated_at, building.building_name AS building_name FROM floor JOIN building ON floor.building_id = building.id ORDER BY building.building_name ASC, floor.floor_name ASC"
 	rows, err := tx.QueryContext(context, query)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -70,6 +70,7 @@ func (repo *FloorRepoImpl) SelectAll(context context.Context, tx *sql.Tx) []doma
 			&floor.BuildingID,
 			&floor.CreatedAt,
 			&floor.UpdatedAt,
+			&floor.BuildingName,
 		)
 		helper.PanicIfError(err)
 		floors = append(floors, floor)

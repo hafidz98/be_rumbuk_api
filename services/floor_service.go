@@ -76,8 +76,10 @@ func (service *FloorServiceImpl) GetAll(context context.Context) []rest.FloorRes
 
 func ToFloorResponse(floor domain.Floor) rest.FloorResponse {
 	return rest.FloorResponse{
-		ID:   floor.ID,
-		Name: floor.Name,
+		ID:           floor.ID,
+		Name:         floor.Name,
+		BuildingId:   floor.BuildingID,
+		BuildingName: floor.BuildingName,
 	}
 }
 
