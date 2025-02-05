@@ -13,7 +13,7 @@ import (
 )
 
 type ReserveRoomRepo interface {
-	//SelectAllReserveRoom()
+	SelectAllReservation(context context.Context, tx *sql.Tx) []domain.ReservationDetail
 	SelectByReservationId(context context.Context, tx *sql.Tx, reservationId int) (domain.Reservation, error)
 	SelectRoomByRTSId(context context.Context, tx *sql.Tx, roomTimeSlotId int) (rest.RoomData, error)
 	SelectReservationByStudentId(context context.Context, tx *sql.Tx, studentId string) []domain.Reservation
@@ -25,6 +25,60 @@ type ReserveRoomRepoImpl struct{}
 
 func NewReserveRoomRepo() ReserveRoomRepo {
 	return &ReserveRoomRepoImpl{}
+}
+
+func (repo *ReserveRoomRepoImpl) SelectAllReservation(context context.Context, tx *sql.Tx) []domain.ReservationDetail {
+	query :=
+		`
+	SELECT
+    	r.id AS reservation_id,
+    	r.reservation_date,
+    	r.activity,
+    	r.status,
+    	r.student_id,
+    	st.name AS student_name,
+    	t.start_time,
+    	t.end_time,
+    	rm.room_name,	
+    	f.floor_name,
+    	b.building_name
+	FROM reservation_ts r
+	JOIN student st ON r.student_id = st.student_id
+	JOIN room_time_slot ts ON r.room_timeslot_id = ts.id
+	JOIN time_slot t ON ts.time_slot_id = t.id
+	JOIN room rm ON ts.room_id = rm.id
+	JOIN floor f ON rm.floor_id = f.id
+	JOIN building b ON f.building_id = b.id
+	ORDER BY 
+    	r.reservation_date DESC,
+		r.id DESC;
+	`
+
+	row, err := tx.QueryContext(context, query)
+	helper.PanicIfError(err)
+	defer row.Close()
+
+	var reservation []domain.ReservationDetail
+	for row.Next() {
+		resData := domain.ReservationDetail{}
+		err := row.Scan(
+			&resData.ID,
+			&resData.BookDate,
+			&resData.Activity,
+			&resData.Status,
+			&resData.StudentID,
+			&resData.StudentName,
+			&resData.StartTime,
+			&resData.EndTime,
+			&resData.RoomName,
+			&resData.FloorName,
+			&resData.BuildingName,
+		)
+		helper.PanicIfError(err)
+		reservation = append(reservation, resData)
+	}
+
+	return reservation
 }
 
 func (repo *ReserveRoomRepoImpl) Create(context context.Context, tx *sql.Tx, reserve domain.Reservation) domain.Reservation {

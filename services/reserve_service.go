@@ -19,6 +19,7 @@ type ReservationService interface {
 	SelectReservationByStudentID(context context.Context, studentId string) []rest.ReserveResponse
 	CreateReservation(context context.Context, request rest.ReserveCreateRequest) (rest.ReserveResponse, string)
 	CancelReservation(context context.Context, reservationId int)
+	GetAllReservation(context context.Context) []rest.ReservationDetailResponse
 }
 
 type ReservationServiceImpl struct {
@@ -45,6 +46,33 @@ func toReserveResponse(reserve domain.Reservation, room rest.RoomData, statusTex
 		Room:       &room,
 		StatusText: statusText,
 	}
+}
+
+func (service *ReservationServiceImpl) GetAllReservation(context context.Context) []rest.ReservationDetailResponse {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	reservations := service.ReserveRepo.SelectAllReservation(context, tx)
+
+	var reserveResponses []rest.ReservationDetailResponse
+	for _, reservation := range reservations {
+		reserveResponses = append(reserveResponses, rest.ReservationDetailResponse{
+			ID:           reservation.ID,
+			BookDate:     reservation.BookDate,
+			StudentID:    reservation.StudentID,
+			Activity:     reservation.Activity,
+			Status:       reservation.Status,
+			StudentName:  reservation.StudentName,
+			StartTime:    reservation.StartTime,
+			EndTime:      reservation.EndTime,
+			RoomName:     reservation.RoomName,
+			FloorName:    reservation.FloorName,
+			BuildingName: reservation.BuildingName,
+		})
+	}
+	
+	return reserveResponses
 }
 
 func (service *ReservationServiceImpl) CreateReservation(context context.Context, request rest.ReserveCreateRequest) (rest.ReserveResponse, string) {

@@ -19,3 +19,17 @@ type Reservation struct {
 	RoomTimeSlotID int
 	Status         string
 }
+
+type ReservationDetail struct {
+	ID             int
+	BookDate       time.Time
+	StudentID      string
+	Activity       string
+	Status         string
+	StudentName    string
+	StartTime      string
+	EndTime        string
+	RoomName       string
+	FloorName      string
+	BuildingName   string
+}

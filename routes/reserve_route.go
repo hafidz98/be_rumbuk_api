@@ -17,6 +17,7 @@ func ReservationRoute(db *sql.DB, validate *validator.Validate) *group.RouteGrou
 
 	reservationEndpoint := group.New("/reservation").POST(reserveController.Create).GET(reserveController.GetReservationByStudentID).Children(
 		group.New("/cancel").POST(reserveController.CancelReservation),
+		group.New("/all").GET(reserveController.GetAllReservation),
 	)
 
 	return reservationEndpoint
