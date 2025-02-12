@@ -15,7 +15,7 @@ import (
 // data model request dan data model response
 // Logic atau bussiness intelligence
 
-func ToStudentResponse(student domain.Students) service_model.StudentResponse {
+func ToStudentResponse(student domain.Student) service_model.StudentResponse {
 	return service_model.StudentResponse{
 		StudentID:   student.StudentID,
 		Name:        student.Name,
@@ -28,7 +28,7 @@ func ToStudentResponse(student domain.Students) service_model.StudentResponse {
 	}
 }
 
-func ToStudentResponses(students []domain.Students) []service_model.StudentResponse {
+func ToStudentResponses(students []domain.Student) []service_model.StudentResponse {
 	var studentResponses []service_model.StudentResponse
 	for _, student := range students {
 		studentResponses = append(studentResponses, ToStudentResponse(student))
@@ -69,7 +69,7 @@ func (service *StudentServiceImpl) Create(context context.Context, request servi
 	password, err := helper.GenerateHashedPassword(request.Password)
 	helper.PanicIfError(err)
 
-	student := domain.Students{
+	student := domain.Student{
 		StudentID:   request.StudentID,
 		Name:        request.Name,
 		Gender:      request.Gender,
@@ -99,7 +99,7 @@ func (service *StudentServiceImpl) Update(context context.Context, request servi
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	student = domain.Students{
+	student = domain.Student{
 		StudentID:   request.StudentID,
 		Name:        request.Name,
 		Gender:      request.Gender,

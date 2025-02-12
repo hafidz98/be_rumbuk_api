@@ -6,6 +6,7 @@ type WebResponse struct {
 	Data   interface{}     `json:"data,omitempty"`
 	Meta   *PaginationMeta `json:"meta,omitempty"`
 	Links  interface{}     `json:"links,omitempty"`
+	Msg    interface{}     `json:"message,omitempty"`
 }
 
 type PaginationMeta struct {

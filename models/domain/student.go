@@ -2,7 +2,7 @@ package domain
 
 //domain model representasi dari tabel dalam basis data
 
-type Students struct {
+type Student struct {
 	ID          int
 	StudentID   string
 	Name        string

@@ -14,7 +14,7 @@ import (
 )
 
 type AuthService interface {
-	Login(context context.Context, request service_model.AuthLoginRequest) (tokenString string)
+	Login(context context.Context, request service_model.AuthLoginRequest) (userId, tokenString string)
 }
 
 type AuthServiceImpl struct {
@@ -33,7 +33,7 @@ func NewAuthService(DB *sql.DB, validate *validator.Validate) AuthService {
 	}
 }
 
-func (service *AuthServiceImpl) Login(context context.Context, request service_model.AuthLoginRequest) (tokenString string) {
+func (service *AuthServiceImpl) Login(context context.Context, request service_model.AuthLoginRequest) (userId, tokenString string) {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
@@ -42,6 +42,10 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 	defer helper.CommitOrRollback(tx)
 
 	userStaff, err := service.StaffRepository.FetchById(context, tx, request.UserID)
+
+	helper.Error.Printf("ID %s : %s", userStaff.StaffID, request.UserID)
+	helper.Error.Printf("Pass %s : %s", userStaff.Password, request.Password)
+
 	match := helper.ComparePassword(userStaff.Password, request.Password)
 
 	helper.Error.Printf("%s : %v", userStaff.StaffID, match)
@@ -54,14 +58,14 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 		}
 
 		claims := jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		}
 
 		token, err := helper.GenerateJWT(&userData, claims)
 		helper.PanicIfError(err)
 
-		return token
+		return userData.UserID, token
 	} else if !match {
 		userStudent, err := service.StudentRepository.FetchBySId(context, tx, request.UserID)
 		match := helper.ComparePassword(userStudent.Password, request.Password)
@@ -87,7 +91,7 @@ func (service *AuthServiceImpl) Login(context context.Context, request service_m
 		token, err := helper.GenerateJWT(&userData, claims)
 		helper.PanicIfError(err)
 
-		return token
+		return userData.UserID, token
 	}
 
 	panic(exception.NewAuthorization(exception.InvalidCredentials))

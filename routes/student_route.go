@@ -20,7 +20,9 @@ func StudentRoute(db *sql.DB, validate *validator.Validate) *group.RouteGroup {
 	apiStudentRoute := group.New("/students").Middleware(middlewares.AuthMiddleware).Children(
 		group.New("").GET(studentController.FindAll).POST(studentController.Create).Middleware(middlewares.RequiredAdmin),
 		group.New("/:studnetId").DELETE(studentController.Delete).Middleware(middlewares.RequiredAdmin),
-		group.New("/:studentId").GET(studentController.FetchById).PATCH(studentController.Update).Middleware(middlewares.RequiredStudentOrAdmin),
+		group.New("/:studentId").GET(studentController.FetchById).PATCH(studentController.Update).Middleware(middlewares.RequiredStudentOrAdmin).Children(
+			ReservationRoute(db,validate),
+		),
 	)
 
 	return apiStudentRoute

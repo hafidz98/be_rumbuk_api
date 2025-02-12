@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/exception"
@@ -15,11 +16,10 @@ import (
 type RoomService interface {
 	Create(context context.Context, request rest.RoomCreateRequest) rest.RoomResponse
 	Update(context context.Context, request rest.RoomUpdateRequest) rest.RoomResponse
+	UpdateRoomStatus(context context.Context, request rest.RoomUpdateRequest) rest.RoomResponse
 	Delete(context context.Context, roomId int)
 	FetchAll(context context.Context) []rest.RoomResponse
 	FetchByID(context context.Context, roomId int) rest.RoomResponse
-	FetchAllRooms(context context.Context, params string) []rest.BuildingResponse
-	FetchAllTS(context context.Context) []rest.TimeSlotResponse
 }
 
 type RoomServiceImpl struct {
@@ -36,15 +36,30 @@ func NewRoomService(roomRepository repositories.RoomRepo, DB *sql.DB, validate *
 	}
 }
 
+func toTimeSlotResponse(ts domain.TimeSlot) rest.TimeSlotResponse {
+	return rest.TimeSlotResponse{
+		ID:        ts.ID,
+		StartTime: ts.StartTime,
+		EndTime:   ts.EndTime,
+	}
+}
+
 func toRoomResponse(room domain.Room) rest.RoomResponse {
+	timeSlots := make([]rest.TimeSlotResponse, len(room.TimeSlot))
+	for i, ts := range room.TimeSlot {
+		timeSlots[i] = toTimeSlotResponse(ts)
+	}
+
 	return rest.RoomResponse{
 		ID:        room.ID,
 		Name:      room.Name,
 		Capacity:  room.Capacity,
 		Building:  room.BuildingID,
 		Floor:     room.FloorID,
+		Status:    room.Status,
 		CreatedAt: room.CreatedAt,
 		UpdatedAt: room.UpdatedAt,
+		TimeSlot:  timeSlots,
 	}
 }
 
@@ -92,6 +107,29 @@ func (service *RoomServiceImpl) Update(context context.Context, request rest.Roo
 	return toRoomResponse(room)
 }
 
+func (service *RoomServiceImpl) UpdateRoomStatus(context context.Context, request rest.RoomUpdateRequest) rest.RoomResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	room, err := service.RoomRepository.FetchByRoomID(context, tx, request.ID)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	room = domain.Room{
+		ID:     request.ID,
+		Status: request.Status,
+	}
+
+	room = service.RoomRepository.UpdateRoomStatus(context, tx, room)
+
+	return toRoomResponse(room)
+}
+
 func (service *RoomServiceImpl) Delete(context context.Context, roomId int) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
@@ -115,11 +153,12 @@ func (service *RoomServiceImpl) FetchAll(context context.Context) []rest.RoomRes
 	var roomResponses []rest.RoomResponse
 	for _, room := range rooms {
 		room := rest.RoomResponse{
-			ID:       room.ID,
-			Name:     room.Name,
-			Capacity: room.Capacity,
-			Building: room.BuildingID,
-			Floor:    room.FloorID,
+			ID:        room.ID,
+			Name:      room.Name,
+			Capacity:  room.Capacity,
+			Building:  room.BuildingID,
+			Floor:     room.FloorID,
+			Status:    room.Status,
 			CreatedAt: room.CreatedAt,
 			UpdatedAt: room.UpdatedAt,
 		}
@@ -139,101 +178,7 @@ func (service *RoomServiceImpl) FetchByID(context context.Context, roomId int) r
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
+	log.Println(room)
+
 	return toRoomResponse(room)
-}
-
-func (service *RoomServiceImpl) FetchAllRooms(context context.Context, params string) []rest.BuildingResponse {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
-	defer helper.CommitOrRollback(tx)
-
-	rooms := service.RoomRepository.FetchAllRoomSpecial(context, tx, params)
-
-	buildings := make(map[int]rest.BuildingResponse)
-	for _, data := range rooms {
-		building, ok := buildings[data.Building.ID]
-
-		if !ok {
-			building = rest.BuildingResponse{
-				ID:     data.Building.ID,
-				Name:   data.Building.Name,
-				Floors: []rest.FloorResponse{},
-			}
-		}
-
-		floorIdx := -1
-		for i, f := range building.Floors {
-			if f.ID == data.Floor.ID {
-				floorIdx = i
-				break
-			}
-		}
-
-		if floorIdx == -1 {
-			f := rest.FloorResponse{
-				ID:     data.Floor.ID,
-				Number: data.Floor.Name,
-				Rooms:  []rest.Rooms{},
-			}
-			building.Floors = append(building.Floors, f)
-			floorIdx = len(building.Floors) - 1
-		}
-
-		roomsIdx := -1
-		for i, r := range building.Floors[floorIdx].Rooms {
-			if r.ID == data.Room.ID {
-				roomsIdx = i
-				break
-			}
-		}
-
-		if roomsIdx == -1 {
-			r := rest.Rooms{
-				ID:       data.Room.ID,
-				Name:     data.Room.Name,
-				Capacity: data.Room.Capacity,
-				TimeSlot: []rest.TimeSlotResponse{},
-			}
-			building.Floors[floorIdx].Rooms = append(building.Floors[floorIdx].Rooms, r)
-			roomsIdx = len(building.Floors[floorIdx].Rooms) - 1
-		}
-
-		ts := rest.TimeSlotResponse{
-			ID:        data.TimeSlot.ID,
-			StartTime: data.TimeSlot.StartTime,
-			EndTime:   data.TimeSlot.EndTime,
-			Reserved:  data.Reserved,
-		}
-
-		building.Floors[floorIdx].Rooms[roomsIdx].TimeSlot = append(building.Floors[floorIdx].Rooms[roomsIdx].TimeSlot, ts)
-
-		buildings[data.Building.ID] = building
-	}
-
-	buildingList := make([]rest.BuildingResponse, 0, len(buildings))
-	for _, b := range buildings {
-		buildingList = append(buildingList, b)
-	}
-
-	return buildingList
-}
-
-func (service *RoomServiceImpl) FetchAllTS(context context.Context) []rest.TimeSlotResponse {
-	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
-	defer helper.CommitOrRollback(tx)
-
-	rooms := service.RoomRepository.FetchAllTS(context, tx)
-	var roomResponses []rest.TimeSlotResponse
-
-	for _, r := range rooms {
-		r := rest.TimeSlotResponse{
-			StartTime: r.StartTime,
-			EndTime:   r.EndTime,
-		}
-
-		roomResponses = append(roomResponses, r)
-	}
-
-	return roomResponses
 }

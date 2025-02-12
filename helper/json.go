@@ -2,13 +2,19 @@ package helper
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 )
 
 func ReadFromRequestBody(request *http.Request, result interface{}) {
 	decoder := json.NewDecoder(request.Body)
 	err := decoder.Decode(result)
-	PanicIfError(err)
+	switch {
+	case err == io.EOF:
+		return
+	case err != nil:
+		PanicIfError(err)
+	}
 }
 
 func WriteToResponseBody(writer http.ResponseWriter, response interface{}) {

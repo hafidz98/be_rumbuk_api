@@ -1,7 +1,9 @@
 package rest
 
 type FloorResponse struct {
-	ID     int     `json:"id"`
-	Number string  `json:"number"`
-	Rooms  []Rooms `json:"rooms"`
+	ID           int            `json:"id"`
+	Name         string         `json:"name"`
+	BuildingId   int            `json:"building_id"`
+	BuildingName string         `json:"building_name,omitempty"`
+	Rooms        []RoomResponse `json:"rooms,omitempty"`
 }

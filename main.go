@@ -12,7 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/app"
 
-	//"github.com/hafidz98/be_rumbuk_api/exception"
+	"github.com/hafidz98/be_rumbuk_api/exception"
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	middleware "github.com/hafidz98/be_rumbuk_api/middlewares"
 	"github.com/hafidz98/be_rumbuk_api/routes"
@@ -44,13 +44,13 @@ func main() {
 	flag.Parse()
 
 	basepath := os.Getenv("API_BASE_PATH")
-	// address := os.Getenv("APP_ADDRESS") + ":" + os.Getenv("APP_PORT")
-	address := ":" + os.Getenv("APP_PORT")
+	address := os.Getenv("APP_ADDRESS") + ":" + os.Getenv("APP_PORT")
+	//address := ":" + os.Getenv("APP_PORT")
 
 	db := app.NewDB()
 	validate := validator.New()
 	router := httprouter.New()
-	//router.PanicHandler = exception.ErrorHandler
+	router.PanicHandler = exception.ErrorHandler
 
 	//go StartNonTLSServer()
 
@@ -59,23 +59,43 @@ func main() {
 		routes.StudentRoute(db, validate),
 		routes.StaffRoute(db, validate),
 		routes.RoomRoute(db, validate),
-		routes.RoomRoute2(db, validate),
 		routes.BuildingRoute(db, validate),
+		routes.TimeslotRoute(db, validate),
+		routes.FloorRoute(db, validate),
+		routes.AvailableRoomRoute(db, validate),
+		routes.ReservationRoute(db, validate),
 	)
 
 	router.HandlerFunc(http.MethodGet, "/routes", func(w http.ResponseWriter, r *http.Request) {
-		tmpl := template.Must(template.ParseFiles("fe/routes.html"))
-		if err := tmpl.Execute(w, nil); err != nil {
+		type ListRoute struct {
+			Method string
+			Path string
+		}
+
+		routeList := []ListRoute{}
+		for _, r := range mainRoute.Routes() {
+			routeList = append(routeList, ListRoute{Method: r.Method(), Path: r.Path()})
+		}
+		
+		tmpl := template.Must(template.ParseFiles("fe/routes.view.html"))
+		if err := tmpl.Execute(w, routeList); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 
 	router.HandlerFunc(http.MethodGet, "/routes/list", func(w http.ResponseWriter, r *http.Request) {
-		var rd []string
-		for _, r := range mainRoute.Routes() {
-			rd = append(rd, r.Path())
+
+		type ListRoute struct {
+			Method string `json:"method"`
+			Path string `json:"path"`
 		}
-		helper.WriteToResponseBody(w, rd)
+
+		routeList := []ListRoute{}
+
+		for _, r := range mainRoute.Routes() {
+			routeList = append(routeList, ListRoute{Method: r.Method(), Path: r.Path()})
+		}
+		helper.WriteToResponseBody(w, routeList)
 	})
 
 	//helper.Info.Print("\n", mainRoute.Routes().String())
