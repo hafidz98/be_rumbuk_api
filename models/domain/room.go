@@ -13,4 +13,5 @@ type Room struct {
 	Status     string
 	CreatedAt  *time.Time
 	UpdatedAt  *time.Time
+	TimeSlot   []TimeSlot
 }

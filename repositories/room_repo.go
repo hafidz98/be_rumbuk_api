@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"log"
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/models/domain"
@@ -64,13 +64,22 @@ func (repo *RoomRepoImpl) Delete(context context.Context, tx *sql.Tx, room domai
 }
 
 func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roomId int) (domain.Room, error) {
-	stmt := "SELECT id, room_name, capacity, building_id, floor_id, status, created_at, updated_at FROM room WHERE id = ?"
+	stmt := `
+		SELECT r.id, r.room_name, r.capacity, r.building_id, r.floor_id, r.status, r.created_at, r.updated_at, t.id AS time_slot_id, t.start_time, t.end_time
+		FROM room r
+		JOIN room_time_slot rt ON r.id = rt.room_id
+		JOIN time_slot t ON rt.time_slot_id = t.id
+		WHERE r.id =  ?`
 	rows, err := tx.QueryContext(context, stmt, roomId)
 	helper.PanicIfError(err)
 	defer rows.Close()
 
-	room := domain.Room{}
-	if rows.Next() {
+	log.Printf("rows db: %v", rows)
+
+	var room domain.Room
+	var timeSlot []domain.TimeSlot
+	for rows.Next() {
+		var ts domain.TimeSlot
 		err := rows.Scan(
 			&room.ID,
 			&room.Name,
@@ -80,12 +89,17 @@ func (repo *RoomRepoImpl) FetchByRoomID(context context.Context, tx *sql.Tx, roo
 			&room.Status,
 			&room.CreatedAt,
 			&room.UpdatedAt,
+			&ts.ID,
+			&ts.StartTime,
+			&ts.EndTime,
 		)
 		helper.PanicIfError(err)
-		return room, nil
+		timeSlot = append(timeSlot, ts)
 	}
 
-	return room, errors.New("room not found")
+	room.TimeSlot = timeSlot
+	log.Printf("rows 2: %v", timeSlot)
+	return room, nil
 }
 
 func (repo *RoomRepoImpl) FetchAll(context context.Context, tx *sql.Tx) []domain.Room {

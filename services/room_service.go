@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hafidz98/be_rumbuk_api/exception"
@@ -35,7 +36,20 @@ func NewRoomService(roomRepository repositories.RoomRepo, DB *sql.DB, validate *
 	}
 }
 
+func toTimeSlotResponse(ts domain.TimeSlot) rest.TimeSlotResponse {
+	return rest.TimeSlotResponse{
+		ID:        ts.ID,
+		StartTime: ts.StartTime,
+		EndTime:   ts.EndTime,
+	}
+}
+
 func toRoomResponse(room domain.Room) rest.RoomResponse {
+	timeSlots := make([]rest.TimeSlotResponse, len(room.TimeSlot))
+	for i, ts := range room.TimeSlot {
+		timeSlots[i] = toTimeSlotResponse(ts)
+	}
+
 	return rest.RoomResponse{
 		ID:        room.ID,
 		Name:      room.Name,
@@ -45,6 +59,7 @@ func toRoomResponse(room domain.Room) rest.RoomResponse {
 		Status:    room.Status,
 		CreatedAt: room.CreatedAt,
 		UpdatedAt: room.UpdatedAt,
+		TimeSlot:  timeSlots,
 	}
 }
 
@@ -162,6 +177,8 @@ func (service *RoomServiceImpl) FetchByID(context context.Context, roomId int) r
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
+
+	log.Println(room)
 
 	return toRoomResponse(room)
 }

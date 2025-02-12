@@ -12,8 +12,11 @@ import (
 
 func RoomRoute(db *sql.DB, validate *validator.Validate) *group.RouteGroup {
 	roomRepository := repositories.NewRoomRepo()
+	roomTimeslotRepo := repositories.NewRoomTimeslotRepo()
 	roomService := services.NewRoomService(roomRepository, db, validate)
+	roomTimeslotService := services.NewRoomTimeslotService(roomTimeslotRepo, db, validate)
 	roomCtrl := controllers.NewRoomController(roomService)
+	roomTimeslotCtrl := controllers.NewRoomTimeslotController(roomTimeslotService)
 
 	apiRoomRoute := group.New("room").Children(
 		group.New("").GET(roomCtrl.FetchAllRooms).POST(roomCtrl.Create).Children(
@@ -21,6 +24,7 @@ func RoomRoute(db *sql.DB, validate *validator.Validate) *group.RouteGroup {
 			group.New("/:roomId").DELETE(roomCtrl.Delete).Children(
 				group.New("/change_status").PATCH(roomCtrl.UpdateRoomStatus),
 			),
+			group.New("/add_timeslot").POST(roomTimeslotCtrl.AddRoomTimeslot),
 		),
 	)
 
