@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
+	"sync"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -71,25 +72,63 @@ func (service *ReservationServiceImpl) GetAllReservation(context context.Context
 			BuildingName: reservation.BuildingName,
 		})
 	}
-	
+
 	return reserveResponses
 }
+
+var (
+	bookings = make(map[string]time.Time)
+	mu       sync.Mutex
+)
 
 func (service *ReservationServiceImpl) CreateReservation(context context.Context, request rest.ReserveCreateRequest) (rest.ReserveResponse, string) {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
 
+	key := fmt.Sprintf("%s|%d", request.BookDate, request.RoomTimeSlotID)
+	createdAt := time.Now()
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	formatedDate, err := time.Parse("2006-01-02", request.BookDate)
+	helper.PanicIfError(err)
+
+	if _, exists := bookings[key]; exists {
+		return rest.ReserveResponse{
+			ReserveID: 0,
+			BookDate:  formatedDate,
+			StudentID: request.StudentID,
+			Activity:  request.Activity,
+			Status:    "",
+			Room:      nil,
+		}, "already_booked"
+	}
+
+	// if existing, exists := bookings[key]; exists {
+	// 	return rest.ReserveResponse{
+	// 		ReserveID:  0,
+	// 		BookDate:   formatedDate,
+	// 		StudentID:  request.StudentID,
+	// 		Activity:   request.Activity,
+	// 		Status:     "",
+	// 		Room:       nil,
+	// 	}, fmt.Sprintf("already_booked_at_%s", existing.Format(time.RFC3339))
+	// }
+
+	bookings[key] = createdAt
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	t, err := time.Parse("2006-01-02", request.BookDate)
+	formatedDate, err = time.Parse("2006-01-02", request.BookDate)
 	helper.PanicIfError(err)
 
 	reserve := domain.Reservation{
 		StudentID:      request.StudentID,
 		Activity:       request.Activity,
-		BookDate:       t,
+		BookDate:       formatedDate,
 		RoomTimeSlotID: request.RoomTimeSlotID,
 	}
 
@@ -107,7 +146,7 @@ func (service *ReservationServiceImpl) CreateReservation(context context.Context
 
 	reserve.Status = "1"
 
-	return toReserveResponse(reserve, roomData, statusText(reserve.Status)), ""
+	return toReserveResponse(reserve, roomData, statusText(reserve.Status)), "success_booked"
 }
 
 func (service *ReservationServiceImpl) SelectReservationByStudentID(context context.Context, studentId string) []rest.ReserveResponse {
