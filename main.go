@@ -44,8 +44,8 @@ func main() {
 	flag.Parse()
 
 	basepath := os.Getenv("API_BASE_PATH")
-	// address := os.Getenv("APP_ADDRESS") + ":" + os.Getenv("APP_PORT")
-	address := ":" + os.Getenv("APP_PORT")
+	address := os.Getenv("APP_ADDRESS") + ":" + os.Getenv("APP_PORT")
+	//address := ":" + os.Getenv("APP_PORT")
 
 	db := app.NewDB()
 	validate := validator.New()
