@@ -7,7 +7,7 @@ RUN apk update && apk add --no-cache git
 
 WORKDIR /app
 
-COPY cert ./cert
+## COPY cert ./cert
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -24,7 +24,7 @@ FROM gcr.io/distroless/static-debian11
 WORKDIR /root/
 
 COPY --from=builder /app/main .
-COPY --from=builder /app/cert ./cert
+## COPY --from=builder /app/cert ./cert
 
 # COPY --from=builder /app/.env .
 

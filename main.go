@@ -69,14 +69,14 @@ func main() {
 	router.HandlerFunc(http.MethodGet, "/routes", func(w http.ResponseWriter, r *http.Request) {
 		type ListRoute struct {
 			Method string
-			Path string
+			Path   string
 		}
 
 		routeList := []ListRoute{}
 		for _, r := range mainRoute.Routes() {
 			routeList = append(routeList, ListRoute{Method: r.Method(), Path: r.Path()})
 		}
-		
+
 		tmpl := template.Must(template.ParseFiles("fe/routes.view.html"))
 		if err := tmpl.Execute(w, routeList); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -87,7 +87,7 @@ func main() {
 
 		type ListRoute struct {
 			Method string `json:"method"`
-			Path string `json:"path"`
+			Path   string `json:"path"`
 		}
 
 		routeList := []ListRoute{}
@@ -114,6 +114,14 @@ func main() {
 	// 		helper.Error.Println(err)
 	// 	}
 	// }()
+
+	// c := cors.New(cors.Options{
+	// 	AllowedOrigins:   []string{"http://localhost:5000", "https://your-flutter-web-domain.com"},
+	// 	AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	// 	AllowedHeaders:   []string{"Content-Type", "Authorization"},
+	// 	AllowCredentials: true,
+	// 	Debug:            true,
+	// })
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
