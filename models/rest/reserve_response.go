@@ -1,12 +1,8 @@
 package rest
 
 import (
-	// "strings"
 	"time"
-	//"github.com/hafidz98/be_rumbuk_api/utils"
 )
-
-//type ct utils.CustomTime
 
 type ReservationDetailResponse struct {
 	ID           int       `json:"reservation_id"`
@@ -40,26 +36,3 @@ type RoomData struct {
 	StartTime    string `json:"start_time"`
 	EndTime      string `json:"end_time"`
 }
-
-// type CustomDate time.Time
-
-// // Implement Marshaler and Unmarshaler interface
-// func (j *CustomDate) UnmarshalJSON(b []byte) error {
-//     s := strings.Trim(string(b), "\"")
-//     t, err := time.Parse("2006-01-02", s)
-//     if err != nil {
-//         return err
-//     }
-//     *j = CustomDate(t)
-//     return nil
-// }
-
-// func (j CustomDate) MarshalJSON() ([]byte, error) {
-//     return []byte("\"" + time.Time(j).Format("2006-01-02") + "\""), nil
-// }
-
-// // Maybe a Format function for printing your date
-// func (j CustomDate) Format(s string) string {
-//     t := time.Time(j)
-//     return t.Format(s)
-// }

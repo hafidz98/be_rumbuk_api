@@ -12,8 +12,7 @@ import (
 	repository "github.com/hafidz98/be_rumbuk_api/repositories"
 )
 
-// data model request dan data model response
-// Logic atau bussiness intelligence
+
 
 func ToStudentResponse(student domain.Student) service_model.StudentResponse {
 	return service_model.StudentResponse{
@@ -127,8 +126,6 @@ func (service *StudentServiceImpl) Delete(context context.Context, studentId str
 
 	service.StudentRepository.Delete(context, tx, student)
 }
-
-//Get and/or show data
 
 func (service *StudentServiceImpl) FetchById(context context.Context, studentId string) service_model.StudentResponse {
 	tx, err := service.DB.Begin()

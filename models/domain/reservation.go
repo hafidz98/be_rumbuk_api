@@ -2,7 +2,6 @@ package domain
 
 import (
 	"time"
-	//"github.com/hafidz98/be_rumbuk_api/utils"
 )
 
 // Reservation Status
