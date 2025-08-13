@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	//"strconv"
 
 	"github.com/hafidz98/be_rumbuk_api/helper"
 	"github.com/hafidz98/be_rumbuk_api/models/rest"
@@ -44,12 +43,6 @@ func (controller *ReservationControllerImpl) Create(writer http.ResponseWriter, 
 	helper.ReadFromRequestBody(request, &reservationCreateRequest)
 
 	reserve, msg := controller.ReserveService.CreateReservation(request.Context(), reservationCreateRequest)
-
-	// type data struct {
-	// 	Msg string `json:"message,omitempty"`
-	// }
-
-	//message := data{Msg: msg}
 
 	webResponse := rest.WebResponse{
 		Code:   http.StatusOK,

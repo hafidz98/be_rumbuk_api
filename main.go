@@ -104,6 +104,8 @@ func main() {
 		router.Handle(r.Method(), r.Path(), r.Handler())
 	}
 
+	router.HandleOPTIONS = true
+
 	server := http.Server{
 		Addr:    address,
 		Handler: router,

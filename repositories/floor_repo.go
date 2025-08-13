@@ -78,6 +78,3 @@ func (repo *FloorRepoImpl) SelectAll(context context.Context, tx *sql.Tx) []doma
 	return floors
 }
 
-//Gedung dapat memiliki lantai dan/atau ruangan atau tidak sama sekali
-//Lantai harus memiliki Gedung dan dapat memiliki Ruangan atau tidak sama sekali
-//Ruangan harus memiliki Lantai dan Gedung
